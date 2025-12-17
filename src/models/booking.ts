@@ -3,7 +3,7 @@ import { User } from './user';
 import { Class } from './class';
 
 export enum BookingStatus {
-    CONMEFIRD = 'confirmed',
+    CONFIRMED = 'confirmed',
     CANCELLED = 'cancelled',
 }
 
