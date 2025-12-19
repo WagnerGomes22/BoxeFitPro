@@ -18,6 +18,7 @@ export default function Login() {
     if (res?.error) setError('Credenciais inválidas');
     else window.location.href = '/';
   };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6">

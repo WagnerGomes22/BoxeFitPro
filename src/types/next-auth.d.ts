@@ -1,4 +1,4 @@
-import { UserType } from '@/models/user';
+import { UserType } from '@/core/models/user';
 import NextAuth, { type DefaultSession } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 
