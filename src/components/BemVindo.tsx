@@ -5,19 +5,19 @@ import React from 'react';
 const BemVindo = () => {
   return (
     <div className="flex min-h-screen w-full flex-col md:flex-row">
-      <div className="relative flex w-full flex-col justify-between bg-red-700 p-8 md:w-1/2 md:p-12 lg:p-16">
+      <div className="relative flex w-full flex-col justify-between bg-zinc-900 p-8 md:w-1/2 md:p-12 lg:p-16">
         
         <div className="absolute inset-0 z-0 overflow-hidden">
-          <div className="absolute inset-0 bg-red-900" />
+          <div className="absolute inset-0 bg-black" />
           
           <div 
-            className="absolute inset-0 bg-cover bg-[center_top_20%] opacity-40 mix-blend-multiply grayscale"
+            className="absolute inset-0 bg-cover bg-[center_top_100%]"
             style={{ 
-              backgroundImage: "url('https://c4.wallpaperflare.com/wallpaper/437/535/508/floyd-mayweather-boxing-wbc-wba-wallpaper-preview.jpg')" 
+              backgroundImage: "url('https://images.unsplash.com/photo-1570170609489-43197f518df0?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')" 
             }}
             aria-hidden="true"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-red-600/90 to-red-900/90 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-br from-black/80 to-zinc-900/90 mix-blend-multiply" />
         </div>
 
         <div className="relative z-10 flex h-full flex-col justify-center">
@@ -31,8 +31,8 @@ const BemVindo = () => {
             <span className="text-2xl font-bold text-white tracking-wide">BoxFit Pro</span>
           </div>
 
-          <div className="max-w-lg">
-            <h1 className="mb-6 text-4xl font-extrabold leading-tight text-white md:text-5xl lg:text-6xl">
+          <div className="max-w-xl">
+            <h1 className="mb-6 text-4xl font-extrabold leading-tight text-white md:text-3xl lg:text-5xl">
               Transforme seu corpo e mente com o boxe
             </h1>
             <p className="text-lg text-red-100/90 md:text-xl">
@@ -64,7 +64,7 @@ const BemVindo = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Professores Certificados</h3>
+                <h3 className="text-gray-900">Professores Certificados</h3>
                 <p className="text-sm text-gray-500">Equipe de instrutores experientes e qualificados</p>
               </div>
             </div>
@@ -76,7 +76,7 @@ const BemVindo = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Horários Flexíveis</h3>
+                <h3 className="text-gray-900">Horários Flexíveis</h3>
                 <p className="text-sm text-gray-500">Aulas disponíveis de segunda a sábado</p>
               </div>
             </div>
@@ -88,7 +88,7 @@ const BemVindo = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Resultados Comprovados</h3>
+                <h3 className="text-gray-900">Resultados Comprovados</h3>
                 <p className="text-sm text-gray-500">Acompanhamento personalizado da sua evolução</p>
               </div>
             </div>
