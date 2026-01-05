@@ -1,5 +1,5 @@
-'use client';
-
+import Link from 'next/link';
+import Image from 'next/image';
 import React from 'react';
 
 const BemVindo = () => {
@@ -17,22 +17,17 @@ const BemVindo = () => {
             }}
             aria-hidden="true"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-black/80 to-zinc-900/90 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-br from-black/40 to-zinc-900/90 mix-blend-multiply" />
         </div>
 
         <div className="relative z-10 flex h-full flex-col justify-center">
           
           <div className="mb-8 flex items-center gap-3 md:mb-12">
-            <div className="flex h-10 w-10 items-center justify-center rounded bg-white/20 backdrop-blur-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-              </svg>
-            </div>
-            <span className="text-2xl font-bold text-white tracking-wide">BoxFit Pro</span>
+            <span className="text-2xl font-bold text-white tracking-[.25em]">BoxeFit Pro</span>
           </div>
 
           <div className="max-w-xl">
-            <h1 className="mb-6 text-4xl font-extrabold leading-tight text-white md:text-3xl lg:text-5xl">
+            <h1 className="mb-6 text-4xl font-extrabold tracking-wide text-white md:text-3xl lg:text-5xl">
               Transforme seu corpo e mente com o boxe
             </h1>
             <p className="text-lg text-red-100/90 md:text-xl">
@@ -45,15 +40,24 @@ const BemVindo = () => {
       <div className="flex w-full flex-col justify-center bg-white p-8 md:w-1/2 md:p-12 lg:p-24 relative">
         
         <div className="w-full max-w-lg mx-auto">
-          <div className="mb-10">
-            <h2 className="mb-3 text-2xl font-bold text-gray-900 md:text-3xl">
-              Bem-vindo ao BoxFit Pro
+          <div className="flex items-center">
+            <h2 className="mb-3 text-2xl font-medium text-gray-800 md:text-2xl">
+              Bem-vindo ao BoxeFit Pro
             </h2>
-            <p className="text-gray-500">
+            <Image
+                src="/logo-boxefit.svg"
+                alt="BoxFit Pro"
+                width={50}
+                height={50}
+                className="h-15 w-25"
+                priority
+              />
+              </div>
+            <p className="text-gray-500 mb-4">
               Está pronto para começar sua jornada no mundo do boxe?
               Vamos te guiar por todo o processo de matrícula.
             </p>
-          </div>
+          
 
           <div className="mb-10 flex flex-col gap-4">
             
@@ -95,15 +99,17 @@ const BemVindo = () => {
 
           </div>
 
-          <button 
-            type="button"
-            className="group mb-6 flex w-full items-center justify-center gap-2 rounded-lg bg-zinc-950 px-6 py-4 text-base font-semibold text-white transition-all hover:bg-zinc-800 hover:shadow-lg active:scale-[0.99]"
-          >
-            Começar Matrícula
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </button>
+          <Link href="/planos" passHref>
+            <button 
+              type="button"
+              className="group cursor-pointer mb-6 flex w-full items-center justify-center gap-2 rounded-lg bg-zinc-950 px-6 py-4 text-base font-semibold text-white transition-all hover:bg-zinc-800 hover:shadow-lg active:scale-[0.99]"
+            >
+              Começar Matrícula
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </button>
+          </Link>
 
           <div className="text-center text-sm text-gray-500">
             Já é aluno?{' '}
