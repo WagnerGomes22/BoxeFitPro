@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Check, Star } from 'lucide-react';
+import Link from 'next/link';
 
 type Plano = {
   id: number;
@@ -102,7 +103,9 @@ const Planos = () => {
                 </li>
               ))}
             </ul>
-            <button className="bg-zinc-950 hover:bg-zinc-800 text-white px-4 py-2 cursor-pointer rounded-lg w-full">{`Escolher ${plano.nome}`}</button>
+            <Link href="/inscricao" className="w-full">
+              <button className="bg-zinc-950 hover:bg-zinc-800 text-white px-4 py-2 cursor-pointer rounded-lg w-full">{`Escolher ${plano.nome}`}</button>
+            </Link>
             </div>
           );
         })}
