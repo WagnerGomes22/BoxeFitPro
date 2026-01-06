@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-@plugin "tailwindcss-animate";
-@import "tw-animate-css";
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -48,7 +45,7 @@
 
 ::selection { 
    background-color: #E10600;
- color: white; 
+  color: white; 
 }
 
 :root {
