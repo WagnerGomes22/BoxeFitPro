@@ -32,10 +32,11 @@ const BemVindo = () => {
             <h1 className="mb-6 text-4xl font-extrabold tracking-wide text-white md:text-3xl lg:text-5xl">
               Transforme seu corpo e mente com o boxe
             </h1>
-            <p className="text-lg text-red-100/90 md:text-xl">
-              Junte-se a centenas de alunos que já transformaram suas vidas
-              através do boxe.
-            </p>
+       <p className="text-lg font-medium md:text-xl text-white">
+          <span className="inline box-decoration-clone bg-[#E10600] px-1 p-1">
+            Junte-se a centenas de alunos que já transformaram suas vidas através do boxe.
+          </span>
+        </p>
           </div>
         </div>
       </div>
@@ -51,7 +52,7 @@ const BemVindo = () => {
               alt="BoxFit Pro"
               width={50}
               height={50}
-              className="h-15 w-25"
+              className="w-25"
               priority
             />
           </div>
@@ -79,7 +80,7 @@ const BemVindo = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="text-gray-900">Professores Certificados</h3>
+                <h3 className="text-gray-900 font-medium">Professores Certificados</h3>
                 <p className="text-sm text-gray-500">
                   Equipe de instrutores experientes e qualificados
                 </p>
@@ -104,7 +105,7 @@ const BemVindo = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="text-gray-900">Horários Flexíveis</h3>
+                <h3 className="text-gray-900 font-medium">Horários Flexíveis</h3>
                 <p className="text-sm text-gray-500">
                   Aulas disponíveis de segunda a sábado
                 </p>
@@ -129,7 +130,7 @@ const BemVindo = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="text-gray-900">Resultados Comprovados</h3>
+                <h3 className="text-gray-900 font-medium">Resultados Comprovados</h3>
                 <p className="text-sm text-gray-500">
                   Acompanhamento personalizado da sua evolução
                 </p>
