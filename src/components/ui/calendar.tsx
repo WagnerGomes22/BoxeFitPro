@@ -1,18 +1,30 @@
 "use client";
 
 import * as React from "react";
-import { DayPicker } from "react-day-picker";
+import { DayPicker, useDayPicker, useNavigation } from "react-day-picker";
 import { ptBR } from "date-fns/locale";
-
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { format } from "date-fns";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
-export function Calendar({ className, classNames, ...props }: CalendarProps) {
+function Calendar({
+  className,
+  classNames,
+  showOutsideDays = true,
+  ...props
+}: CalendarProps) {
   return (
     <DayPicker
+      showOutsideDays={showOutsideDays}
       locale={ptBR}
-      showOutsideDays
       className={cn(
         "p-3 rounded-xl bg-[#0B1220] text-gray-200 border border-gray-700",
         className
@@ -20,10 +32,11 @@ export function Calendar({ className, classNames, ...props }: CalendarProps) {
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
-        caption: "flex justify-around pt-1 relative items-center",
-        caption_label: "text-sm font-medium text-gray-200",
+        caption: "flex justify-center pt-1 relative items-center",
+        caption_label: "text-sm font-medium hidden",
         nav: "space-x-1 flex items-center",
-        nav_button: "h-7 w-7 bg-transparent pl-0 hover:!bg-transparent hover:!text-gray-400",
+        nav_button:
+          "h-7 w-7 bg-transparent pl-0 hover:!bg-transparent hover:!text-gray-400",
         table: "w-full border-collapse space-y-1",
         head_row: "flex",
         head_cell: "text-gray-400 rounded-md w-9 font-normal text-[0.8rem]",
@@ -43,7 +56,74 @@ export function Calendar({ className, classNames, ...props }: CalendarProps) {
         day_hidden: "invisible",
         ...classNames,
       }}
+      components={{
+        Caption: CustomCaption,
+      }}
       {...props}
     />
   );
 }
+Calendar.displayName = "Calendar";
+
+function CustomCaption() {
+  const { goToMonth, currentMonth } = useNavigation();
+  const { fromYear, toYear } = useDayPicker();
+
+  const handleYearChange = (value: string) => {
+    const newDate = new Date(currentMonth);
+    newDate.setFullYear(parseInt(value, 10));
+    goToMonth(newDate);
+  };
+
+  const handleMonthChange = (value: string) => {
+    const newDate = new Date(currentMonth);
+    newDate.setMonth(parseInt(value, 10));
+    goToMonth(newDate);
+  };
+
+  const years = Array.from(
+    { length: (toYear ?? new Date().getFullYear()) - (fromYear ?? 1970) + 1 },
+    (_, i) => (fromYear ?? 1970) + i
+  ).reverse();
+  const months = Array.from({ length: 12 }, (_, i) => i);
+
+  return (
+    <div className="flex justify-center items-center space-x-2 mb-4">
+      <Select
+        value={currentMonth.getFullYear().toString()}
+        onValueChange={handleYearChange}
+      >
+        <SelectTrigger className="w-[100px]">
+          <SelectValue placeholder="Ano" />
+        </SelectTrigger>
+        <SelectContent>
+          {years.map((year) => (
+            <SelectItem key={year} value={year.toString()}>
+              {year}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select
+        value={currentMonth.getMonth().toString()}
+        onValueChange={handleMonthChange}
+      >
+        <SelectTrigger className="w-[150px]">
+          <SelectValue placeholder="Mês" />
+        </SelectTrigger>
+        <SelectContent>
+          {months.map((month) => (
+            <SelectItem key={month} value={month.toString()}>
+              {format(new Date(currentMonth.getFullYear(), month), "MMMM", {
+                locale: ptBR,
+              })}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+export { Calendar };

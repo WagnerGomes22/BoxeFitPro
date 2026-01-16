@@ -36,24 +36,46 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { DayPicker } from "react-day-picker";
+
+const dataMinima18Anos = () => {
+  const hoje = new Date();
+  hoje.setFullYear(hoje.getFullYear() - 18);
+  return hoje;
+};
 
 const formSchema = z.object({
   nomeCompleto: z.string().min(2, {
     message: "O nome deve ter pelo menos 2 caracteres.",
   }),
+
   email: z.string().email({
     message: "Por favor, insira um endereço de e-mail válido.",
   }),
-  telefone: z.string().optional(),
-  dataNascimento: z.date().optional(),
+
+  telefone: z.string().min(10, { message: "O telefone é obrigatório." }),
+
+   dataNascimento: z
+    .date({
+      message: "A data de nascimento é obrigatória",
+    })
+    .refine((data) => {
+      return data <= dataMinima18Anos();
+    }, {
+      message: "Você deve ter pelo menos 18 anos."
+    }),
+  
   rua: z.string().optional(),
   numero: z.string().optional(),
   complemento: z.string().optional(),
   bairro: z.string().optional(),
   cidade: z.string().optional(),
   estado: z.string().optional(),
-  cep: z.string().optional(),
+    cep: z
+    .string()
+    .optional()
+    .refine((value) => !value || /^\d{5}-?\d{3}$/.test(value), {
+      message: "CEP inválido. O formato deve ser 00000-000 ou 00000000.",
+    }),
   contatoEmergenciaNome: z.string().optional(),
   contatoEmergenciaTelefone: z.string().optional(),
 });
@@ -65,7 +87,6 @@ const FormularioInscricao = () => {
       nomeCompleto: "",
       email: "",
       telefone: "",
-      dataNascimento: undefined, 
       rua: "",
       numero: "",
       complemento: "",
@@ -78,9 +99,65 @@ const FormularioInscricao = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  const handleCepBlur = async (cep: string) => {
+    const { setValue, setError } = form;
+    const cepLimpo = cep.replace(/\D/g, "");
+
+    if (cepLimpo.length !== 8) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+      const data = await response.json();
+
+      if (data.erro) {
+        setError("cep", {
+          type: "manual",
+          message: "CEP não encontrado.",
+        });
+        return;
+      }
+
+      setValue("rua", data.logradouro);
+      setValue("bairro", data.bairro);
+      setValue("cidade", data.localidade);
+      setValue("estado", data.uf);
+    } catch (error) {
+      setError("cep", {
+        type: "manual",
+        message: "Erro ao buscar o CEP. Tente novamente.",
+      });
+    }
+  };
+
+  const handleSubmit = async (dados: any) => {
+  try {
+    // 1. Chama nossa API
+    const response = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: dados.email,
+        nome: dados.nome,
+        plano: "Mensal", // Exemplo
+        priceId: "price_EXEMPLO_DO_STRIPE", // IMPORTANTE: Substitua pelo ID real do seu preço no Stripe
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.url) {
+      // 2. Redireciona para o Stripe
+      window.location.href = data.url;
+    } else {
+      console.error("Erro:", data.error);
+      alert("Erro ao iniciar pagamento.");
+    }
+  } catch (error) {
+    console.error("Erro na requisição:", error);
   }
+};
 
   return (
     <Card className="w-full max-w-3xl mx-auto my-8">
@@ -92,7 +169,7 @@ const FormularioInscricao = () => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
             {/* Seção de Informações Pessoais */}
             <div className="mb-8">
               <h3 className="text-lg font-semibold mb-4">
@@ -137,7 +214,7 @@ const FormularioInscricao = () => {
                   name="telefone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Telefone</FormLabel>
+                      <FormLabel>Telefone *</FormLabel>
                       <FormControl>
                         <Input placeholder="(99) 99999-9999" {...field} />
                       </FormControl>
@@ -182,6 +259,8 @@ const FormularioInscricao = () => {
                               date > new Date() || date < new Date("1900-01-01")
                             }
                             locale={ptBR}
+                            fromYear={1970}
+                            toYear={new Date().getFullYear()}
                           />
                         </PopoverContent>
                       </Popover>
@@ -198,12 +277,31 @@ const FormularioInscricao = () => {
             {/* Seção de Endereço */}
             <div className="mb-8">
               <h3 className="text-lg font-semibold mb-4">Endereço</h3>
-              <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <FormField
+                  control={form.control}
+                  name="cep"
+                  render={({ field }) => (
+                    <FormItem className="">
+                      <FormLabel>CEP</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="00000-000"
+                          {...field}
+                          onBlur={() => handleCepBlur(field.value ?? "")}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />  
+
                 <FormField
                   control={form.control}
                   name="rua"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-4">
+                    <FormItem className="">
                       <FormLabel>Rua</FormLabel>
                       <FormControl>
                         <Input placeholder="Nome da sua rua" {...field} />
@@ -216,7 +314,7 @@ const FormularioInscricao = () => {
                   control={form.control}
                   name="numero"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-2">
+                    <FormItem className="">
                       <FormLabel>Número</FormLabel>
                       <FormControl>
                         <Input placeholder="Ex: 123" {...field} />
@@ -229,7 +327,7 @@ const FormularioInscricao = () => {
                   control={form.control}
                   name="complemento"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-3">
+                    <FormItem className="">
                       <FormLabel>Complemento</FormLabel>
                       <FormControl>
                         <Input placeholder="Apto, bloco, etc." {...field} />
@@ -242,7 +340,7 @@ const FormularioInscricao = () => {
                   control={form.control}
                   name="bairro"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-3">
+                    <FormItem className="">
                       <FormLabel>Bairro</FormLabel>
                       <FormControl>
                         <Input placeholder="Seu bairro" {...field} />
@@ -255,7 +353,7 @@ const FormularioInscricao = () => {
                   control={form.control}
                   name="cidade"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-3">
+                    <FormItem className="">
                       <FormLabel>Cidade</FormLabel>
                       <FormControl>
                         <Input placeholder="Sua cidade" {...field} />
@@ -268,7 +366,7 @@ const FormularioInscricao = () => {
                   control={form.control}
                   name="estado"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-2">
+                    <FormItem className="">
                       <FormLabel>Estado</FormLabel>
                       <FormControl>
                         <Input placeholder="UF" {...field} />
@@ -277,19 +375,7 @@ const FormularioInscricao = () => {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="cep"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-1">
-                      <FormLabel>CEP</FormLabel>
-                      <FormControl>
-                        <Input placeholder="00000-000" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+               
               </div>
             </div>
 

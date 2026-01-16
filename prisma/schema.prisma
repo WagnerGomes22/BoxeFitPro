@@ -1,0 +1,52 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+enum StatusInscricao {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum Plano {
+  BASIC
+  PREMIUM
+  VIP
+}
+
+model Inscricao {
+  id        String   @id @default(uuid())
+
+  nome      String
+  email     String
+  telefone  String
+  cpf       String
+  genero    String
+  dataNascimento DateTime
+
+  plano     Plano
+  stripePriceId String
+
+  status    StatusInscricao @default(PENDING)
+
+  cep         String
+  logradouro  String
+  numero      String
+  complemento String?
+  bairro      String
+  cidade      String
+  estado      String
+
+  stripeCheckoutSessionId String?
+  stripeCustomerId        String?   @unique 
+  stripeSubscriptionId    String?   @unique 
+  stripeCurrentPeriodEnd  DateTime?        
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
