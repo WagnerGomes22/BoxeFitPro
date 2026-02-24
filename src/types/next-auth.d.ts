@@ -1,39 +1,29 @@
-import { UserType } from '@/core/models/user';
-import NextAuth, { type DefaultSession } from 'next-auth';
-import { JWT } from 'next-auth/jwt';
+import { Role } from "@prisma/client";
+import NextAuth, { type DefaultSession } from "next-auth";
+import { JWT } from "next-auth/jwt";
 
-// Este arquivo informa ao TypeScript como é a "forma" dos nossos objetos customizados
-// de Sessão e JWT, adicionando as propriedades que incluímos nas callbacks.
+declare module "next-auth" {
+  /**
+   * Returned by `auth`, `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
+   */
+  interface Session {
+    user: {
+      /** The user's postal address. */
+      id: string;
+      role: Role;
+    } & DefaultSession["user"];
+  }
 
-declare module 'next-auth' {
-    /**
-     * Retornado pela `auth`, `useSession`, `getSession` e recebido como prop
-     * para o `SessionProvider`.
-     */
-    interface Session {
-        user: {
-            /** O ID do usuário. */
-            id: string;
-            /** O tipo do usuário (aluno ou instrutor). */
-            type: UserType;
-            // Mantém as propriedades padrão (name, email, image)
-        } & DefaultSession['user'];
-    }
-
-    /**
-     * O objeto de usuário que passamos para a callback `authorize`.
-     */
-    interface User {
-        type: UserType;
-    }
+  interface User {
+    role: Role;
+  }
 }
 
-declare module 'next-auth/jwt' {
-    /** Retornado pela callback `jwt` e recebido pela callback `session`. */
-    interface JWT {
-        /** O ID do usuário. */
-        id: string;
-        /** O tipo do usuário. */
-        type: UserType;
-    }
+declare module "next-auth/jwt" {
+  /** Returned by the `jwt` callback and `getToken`, when using JWT sessions */
+  interface JWT {
+    /** OpenID ID Token */
+    id: string;
+    role: Role;
+  }
 }

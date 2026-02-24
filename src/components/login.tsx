@@ -1,74 +1,131 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2, LogIn } from "lucide-react";
+import { useRouter } from 'next/navigation';
+import { toast } from "sonner";
+// import { getUserRole } from '@/actions/user/get-role'; // REMOVIDO PARA EVITAR ERROS DE HIDRATAÇÃO/NETWORK
 
 export default function Login() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
-    const res = await signIn('credentials', { redirect: false, email, password });
-    setLoading(false);
-    if (res?.error) setError('Credenciais inválidas');
-    else window.location.href = '/';
-  };
   
+    try {
+      const res = await signIn('credentials', { 
+        redirect: false, 
+        email, 
+        password 
+      });
+
+      if (res?.error) {
+        toast.error("Credenciais inválidas. Verifique seu e-mail e senha.");
+        setLoading(false);
+        return;
+      } 
+      
+      // Se chegou aqui, o login foi bem sucedido
+      toast.success("Login realizado com sucesso!");
+
+      try {
+        // Tenta buscar a role diretamente da sessão (cookie), sem chamar server action extra
+        console.log(`[CLIENT] Tentando obter sessão para: "${email}"`);
+
+        const session = await getSession();
+        const role = session?.user?.role;
+        
+        console.log(`[CLIENT] Role na sessão:`, role);
+
+        if (role === 'ADMIN' || role === 'INSTRUCTOR') {
+            window.location.href = '/admin';
+        } else {
+            window.location.href = '/dashboard';
+        }
+      } catch (roleError) {
+        console.error("Erro ao redirecionar por role:", roleError);
+        window.location.href = '/dashboard';
+      }
+
+    } catch (error) {
+      console.error("Erro crítico no login:", error);
+      toast.error("Ocorreu um erro ao tentar entrar.");
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
-      <div className="w-full max-w-md rounded-2xl border border-neutral-200/40 bg-white/70 dark:bg-neutral-900/60 backdrop-blur shadow-sm">
-        <div className="px-6 pt-6">
-          <h1 className="text-2xl font-semibold tracking-tight">Entrar</h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Acesse sua conta para agendar suas aulas</p>
+    <div className="min-h-screen flex items-center justify-center px-4 bg-neutral-950 text-white">
+      <div className="w-full max-w-sm space-y-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-black italic tracking-tighter mb-2">
+            BOXE<span className="text-red-600">_PASS</span>
+          </h1>
+          <p className="text-neutral-400 text-sm">Entre no ringue.</p>
         </div>
-        <form onSubmit={handleSubmit} className="px-6 pb-6 mt-4 space-y-4">
-          {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 text-red-700 px-3 py-2 text-sm">
-              {error}
+
+        <div className="bg-neutral-900 border border-neutral-800 p-8 rounded-sm shadow-2xl">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-xs uppercase tracking-widest text-neutral-500 font-bold">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="bg-neutral-950 border-neutral-800 text-white focus:border-red-600 focus:ring-red-600/20 rounded-sm"
+                placeholder="lutador@exemplo.com"
+                autoComplete="email"
+              />
             </div>
-          )}
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">Email</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full rounded-lg border border-neutral-300 bg-white dark:bg-neutral-800 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/80 dark:focus:ring-white/70"
-              placeholder="seu@email.com"
-              autoComplete="email"
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">Senha</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full rounded-lg border border-neutral-300 bg-white dark:bg-neutral-800 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/80 dark:focus:ring-white/70"
-              placeholder="••••••••"
-              autoComplete="current-password"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-black text-white dark:bg-white dark:text-black px-4 py-2.5 text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60"
-          >
-            {loading ? 'Entrando...' : 'Entrar'}
-          </button>
-        </form>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-xs uppercase tracking-widest text-neutral-500 font-bold">Senha</Label>
+                <a href="#" className="text-[10px] text-red-500 hover:text-red-400 font-bold uppercase tracking-wider">Esqueceu?</a>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="bg-neutral-950 border-neutral-800 text-white focus:border-red-600 focus:ring-red-600/20 rounded-sm"
+                placeholder="••••••••"
+                autoComplete="current-password"
+              />
+            </div>
+            
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest rounded-sm h-11"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Entrando...
+                </>
+              ) : (
+                <>
+                  <LogIn className="mr-2 h-4 w-4" /> Entrar
+                </>
+              )}
+            </Button>
+          </form>
+        </div>
+
+        <p className="text-center text-xs text-neutral-500">
+          Ainda não tem conta? <a href="/planos" className="text-white hover:underline font-bold">Inscreva-se</a>
+        </p>
       </div>
     </div>
   );
 }
-

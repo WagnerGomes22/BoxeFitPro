@@ -1,9 +1,69 @@
+"use client";
+
 import React from 'react';
 import Image from 'next/image';
-import { Check, Star } from 'lucide-react';
-import Link from 'next/link';
+import { Check, Star, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { createCheckoutSession } from '@/actions/subscription/checkout';
+import { toast } from 'sonner';
 
-const Planos = () => {
+export interface Plano {
+  id: string;
+  nome: string;
+  preco: number;
+  periodo: string;
+  priceId: string;
+}
+
+interface PlanosProps {
+  user?: any;
+  activePlanName?: string | null;
+}
+
+const Planos = ({ user, activePlanName }: PlanosProps) => {
+  const router = useRouter(); 
+  const [loadingId, setLoadingId] = React.useState<string | null>(null);
+
+  const isCurrentPlan = (nome: string) => {
+    return activePlanName === nome;
+  };
+
+  const handleSelecionarPlano = async (plano: Plano) => {
+    // Se usuário estiver logado, inicia fluxo de checkout direto (upgrade/downgrade/novo)
+    if (user) {
+      try {
+        setLoadingId(plano.id);
+        const result = await createCheckoutSession(plano.priceId, plano.nome);
+        
+        if (result.success) {
+            toast.success(result.message);
+            // Dá tempo do toast aparecer antes de redirecionar
+            setTimeout(() => {
+                router.push('/dashboard/perfil');
+            }, 1500);
+            return;
+        }
+
+        if (result.url) {
+          window.location.href = result.url;
+        } else {
+          toast.error(result.error || "Erro ao iniciar checkout");
+        }
+      } catch (error) {
+        toast.error("Ocorreu um erro ao processar sua solicitação.");
+        console.error(error);
+      } finally {
+        setLoadingId(null);
+      }
+      return;
+    }
+
+    // Fluxo para usuário não logado (Redireciona para inscrição)
+    localStorage.setItem('planoSelecionado', JSON.stringify(plano));
+    router.push('/inscricao');
+  };
+
   return (
     <div className="flex flex-col items-center justify-center p-4">
         <Image
@@ -19,20 +79,21 @@ const Planos = () => {
         Selecione o plano que melhor se adapta aos seus objetivos
       </p>
       <div className="relative mt-10 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+        {/* Plano Básico */}
         <div
           className="relative bg-white h-96 w-80 rounded-xl shadow-lg p-6 border-2 border-[#F5F5F5] transition-transform duration-300"
         >
-          <h2 className="text-base font-semibold text-center mb-2">
+          <h2 className="text-base font-bold text-center mb-2">
             Básico
           </h2>
           <p className="text-base font-light text-center mb-2">
-            R$ <span className="font-medium text-3xl">29,90</span>
+            R$ <span className="font-bold text-3xl">29,90</span>
             <span className="text-xl">/mês</span>
           </p>
           <p className="text-sm text-center mb-4">Ideal para quem está começando.</p>
           <ul className="text-sm mb-6 space-y-2">
             <li className="flex items-center">
-              <Check className="h-4 w-4 mr-2 text-green-500" />
+              <Check className="h-4 w-4 mr-2 text-white" />
               <span>Acesso 2x por semana</span>
             </li>
             <li className="flex items-center">
@@ -44,25 +105,44 @@ const Planos = () => {
               <span>Armário individual</span>
             </li>
           </ul>
-          <Link
-            href="/inscricao"
-            className="block w-full bg-zinc-950 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-center"
+          <Button
+            type="button"
+            className={`block w-full mt-20 px-4 py-2 rounded-lg text-center ${
+              isCurrentPlan('Básico') 
+                ? "bg-emerald-600 hover:bg-emerald-600 cursor-default text-white" 
+                : "bg-zinc-950 hover:bg-zinc-800 text-white"
+            }`}
+            onClick={(e) => {
+              e.preventDefault();
+              if (isCurrentPlan('Básico')) return;
+              handleSelecionarPlano({
+                id: 'basico',
+                nome: 'Básico',
+                preco: 29.90,
+                periodo: 'mensal',
+                priceId: 'price_1SrLkRBb2zDLKzymqY8wmP9B'
+              });
+            }}
+            disabled={loadingId !== null || isCurrentPlan('Básico')}
           >
-            Escolher Básico
-          </Link>
+            {loadingId === 'basico' ? <Loader2 className="mr-2 h-4 w-4 animate-spin inline" /> : null}
+            {isCurrentPlan('Básico') ? 'Plano Atual' : 'Escolher Básico'}
+          </Button>
         </div>
+
+        {/* Plano Premium */}
         <div
-          className="relative bg-white h-96 w-80 rounded-xl shadow-lg p-6 border-2 border-red-600 transition-transform duration-300 transform scale-105 shadow-xl z-10"
+          className="relative bg-white h-96 w-80 rounded-xl shadow-lg p-6 border-2 border-red-600 transition-transform duration-300 z-10"
         >
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 transform bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center z-20">
             <Star className="h-4 w-4 mr-1 fill-white stroke-none" />
             Recomendado
           </div>
-          <h2 className="text-base font-semibold text-center mb-2">
+          <h2 className="text-base font-bold text-center mb-2">
             Premium
           </h2>
           <p className="text-base font-light text-center mb-2">
-            R$ <span className="font-medium text-3xl">49,90</span>
+            R$ <span className="font-bold text-3xl">49,90</span>
             <span className="text-xl">/mês</span>
           </p>
           <p className="text-sm text-center mb-4">Acesso completo e mais flexibilidade.</p>
@@ -84,21 +164,40 @@ const Planos = () => {
               <span>Aulas em grupo</span>
             </li>
           </ul>
-          <Link
-            href="/inscricao"
-            className="block w-full bg-zinc-950 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-center"
+          <Button
+            type="button"
+            className={`block w-full mt-14 px-4 py-2 rounded-lg text-center ${
+              isCurrentPlan('Premium') 
+                ? "bg-emerald-600 hover:bg-emerald-600 cursor-default text-white" 
+                : "bg-zinc-950 hover:bg-zinc-800 text-white"
+            }`}
+            onClick={(e) => {
+              e.preventDefault();
+              if (isCurrentPlan('Premium')) return;
+              handleSelecionarPlano({
+                id: 'premium',
+                nome: 'Premium',
+                preco: 49.90,
+                periodo: 'mensal',
+                priceId: 'price_1SrLkRBb2zDLKzymJmjiNjR8'
+              });
+            }}
+            disabled={loadingId !== null || isCurrentPlan('Premium')}
           >
-            Escolher Premium
-          </Link>
+            {loadingId === 'premium' ? <Loader2 className="mr-2 h-4 w-4 animate-spin inline" /> : null}
+            {isCurrentPlan('Premium') ? 'Plano Atual' : 'Escolher Premium'}
+          </Button>
         </div>
+
+        {/* Plano VIP */}
         <div
-          className="relative bg-white h-96 w-80 rounded-xl shadow-lg p-6 border-2 border-yellow-500 transition-transform duration-300"
+          className="relative text-white bg-[#3b3b40] h-96 w-80 rounded-xl shadow-lg p-6 border-2 border-[#FFD700] transition-transform duration-300"
         >
-          <h2 className="text-base font-semibold text-center mb-2">
+          <h2 className="text-base text-[#FFD700] font-bold text-center mb-2">
             VIP
           </h2>
           <p className="text-base font-light text-center mb-2">
-            R$ <span className="font-medium text-3xl">79,90</span>
+            R$ <span className="font-bold text-3xl">79,90</span>
             <span className="text-xl">/mês</span>
           </p>
           <p className="text-sm text-center mb-4">Treinamento personalizado</p>
@@ -124,12 +223,29 @@ const Planos = () => {
               <span>Personal trainer</span>
             </li>
           </ul>
-          <Link
-            href="/inscricao"
-            className="block w-full bg-zinc-950 hover:bg-zinc-800 text-white px-4 py-2 rounded-lg text-center"
+          <Button
+            type="button"
+            className={`block w-full mt-8 px-4 py-2 rounded-lg text-center ${
+              isCurrentPlan('VIP') 
+                ? "bg-emerald-600 hover:bg-emerald-600 cursor-default text-white" 
+                : "bg-zinc-950 hover:bg-zinc-800 text-white"
+            }`}
+            onClick={(e) => {
+              e.preventDefault();
+              if (isCurrentPlan('VIP')) return;
+              handleSelecionarPlano({
+                id: 'vip',
+                nome: 'VIP',
+                preco: 79.90,
+                periodo: 'mensal',
+                priceId: 'price_1SrLkSBb2zDLKzymSYgpbKHD'
+              });
+            }}
+            disabled={loadingId !== null || isCurrentPlan('VIP')}
           >
-            Escolher VIP
-          </Link>
+            {loadingId === 'vip' ? <Loader2 className="mr-2 h-4 w-4 animate-spin inline" /> : null}
+            {isCurrentPlan('VIP') ? 'Plano Atual' : 'Escolher VIP'}
+          </Button>
         </div>
       </div>
 

@@ -7,46 +7,167 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Role {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
+}
 
-enum StatusInscricao {
+enum SubscriptionStatus {
   PENDING
-  PAID
-  FAILED
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
 }
 
-enum Plano {
-  BASIC
-  PREMIUM
-  VIP
+model User {
+  id            String    @id @default(uuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  
+  // Dados Pessoais (Opcionais no cadastro inicial via OAuth)
+  cpf           String?    @unique
+  phone         String?
+  birthDate     DateTime?
+  role          Role      @default(STUDENT)
+  
+  // NextAuth
+  accounts      Account[]
+  sessions      Session[]
+
+  // Relacionamentos
+  addresses     Address[]
+  subscriptions Subscription[]
+  emergencyContacts EmergencyContact[]
+  
+  classesGiven  Class[]    @relation("InstructorClasses")
+  bookings      Booking[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
-model Inscricao {
-  id        String   @id @default(uuid())
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
 
-  nome      String
-  email     String
-  telefone  String
-  cpf       String
-  genero    String
-  dataNascimento DateTime
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  plano     Plano
-  stripePriceId String
+  @@unique([provider, providerAccountId])
+}
 
-  status    StatusInscricao @default(PENDING)
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Address {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
   cep         String
-  logradouro  String
-  numero      String
-  complemento String?
-  bairro      String
-  cidade      String
-  estado      String
+  street      String
+  number      String
+  complement  String?
+  district    String
+  city        String
+  state       String
+  active      Boolean  @default(true) // Define qual é o endereço atual
 
+  createdAt   DateTime @default(now())
+}
+
+model EmergencyContact {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name        String
+  phone       String
+
+  createdAt   DateTime @default(now())
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  userId               String
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  planName             String             // Ex: "Boxe Premium"
+  stripePriceId        String
+  status               SubscriptionStatus @default(PENDING)
+  
   stripeCheckoutSessionId String?
-  stripeCustomerId        String?   @unique 
-  stripeSubscriptionId    String?   @unique 
-  stripeCurrentPeriodEnd  DateTime?        
+  stripeCustomerId        String?
+  stripeSubscriptionId    String?   @unique
+  currentPeriodEnd        DateTime?
+  
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model Class {
+  id          String   @id @default(uuid())
+  name        String   // Ex: "Boxe Iniciante", "Muay Thai"
+  description String?
+  instructorId String
+  instructor   User     @relation("InstructorClasses", fields: [instructorId], references: [id])
+  
+  startTime   DateTime
+  endTime     DateTime
+  capacity    Int      // Limite de alunos
+  
+  bookings    Booking[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Booking {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  classId   String
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  
+  status    BookingStatus @default(CONFIRMED)
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([userId, classId]) // Impede agendamento duplicado na mesma aula
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELED
+  ATTENDED
+  NO_SHOW
 }

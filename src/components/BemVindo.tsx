@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import React from 'react';
+import { Button } from '@/components/ui/button';
 
 const BemVindo = () => {
   return (
@@ -11,7 +12,7 @@ const BemVindo = () => {
 
           <div className="absolute inset-0 bg-cover bg-[center_top_100%]">
             <Image
-              src="/background-boxe.jpg"
+              src="/bg-boxe.jpg"
               alt=""
               fill
               className="object-cover object-top"
@@ -138,12 +139,12 @@ const BemVindo = () => {
             </div>
           </div>
 
-          <Link href="/planos" passHref>
-            <button
-              type="button"
-              className="group cursor-pointer mb-6 flex w-full items-center justify-center gap-2 rounded-lg bg-zinc-950 px-6 py-4 text-base font-semibold text-white transition-all hover:bg-zinc-800 hover:shadow-lg active:scale-[0.99]"
-            >
-              Começar Matrícula
+          <Button
+            asChild
+            className="group mb-6 flex w-full items-center justify-center gap-2 px-6 py-4 text-base font-semibold"
+          >
+            <Link href="/planos">
+              <span>Começar Matrícula</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5 transition-transform group-hover:translate-x-1"
@@ -158,8 +159,8 @@ const BemVindo = () => {
                   d="M17 8l4 4m0 0l-4 4m4-4H3"
                 />
               </svg>
-            </button>
-          </Link>
+            </Link>
+          </Button>
 
           <div className="text-center text-sm text-gray-500">
             Já é aluno?{" "}

@@ -1,49 +1,53 @@
-import NextAuth from 'next-auth';
-import Credentials from 'next-auth/providers/credentials';
-import type { User } from '@/models/user';
-import { UserType } from '@/models/user';
+import NextAuth from "next-auth"
+import { PrismaAdapter } from "@auth/prisma-adapter"
+import { prisma } from "@/lib/prisma"
+import Credentials from "next-auth/providers/credentials"
+import { authConfig } from "./auth.config"
+import { z } from "zod"
+import { User } from "@prisma/client"
+import bcrypt from "bcryptjs"
 
-const users: User[] = [
-    { id: '1', name: 'Aluno Teste', email: 'aluno@test.com', password: '123', type: UserType.STUDENT },
-    { id: '2', name: 'Instrutor Teste', email: 'instrutor@test.com', password: '123', type: UserType.INSTRUCTOR },
-];
+export const { auth, signIn, signOut, handlers } = NextAuth({
+  ...authConfig,
+  adapter: PrismaAdapter(prisma) as any,
+  session: { strategy: "jwt" },
+  providers: [
+    Credentials({
+      async authorize(credentials) {
+        const parsedCredentials = z
+          .object({ email: z.string().email(), password: z.string().min(6) })
+          .safeParse(credentials);
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-    providers: [
-        Credentials({
-            name: 'Credentials',
-            credentials: {
-                email: { label: 'Email', type: 'email', placeholder: 'seu@email.com' },
-                password: { label: 'Password', type: 'password' },
-            },
-            async authorize(credentials) {
-                const user = users.find(u => u.email === credentials.email);
+        if (parsedCredentials.success) {
+          const { email, password } = parsedCredentials.data;
+          const user = await prisma.user.findUnique({ where: { email } });
+          if (!user || !user.password) return null;
+          
+          const passwordsMatch = await bcrypt.compare(password, user.password);
+          if (passwordsMatch) return user as any;
+        }
 
-             
-                if (user && user.password === credentials.password) {
-                    const { password, ...userWithoutPassword } = user;
-                    return userWithoutPassword;
-                }
-
-                return null;
-            },
-        }),
-    ],
-    callbacks: {
-        jwt({ token, user }) {
-            if (user) {
-                token.id = user.id!;
-                token.type = (user as User).type;
-            }
-            return token;
-        },
-        session({ session, token }) {
-            session.user.id = token.id as string;
-            session.user.type = token.type as UserType;
-            return session;
-        },
+        return null;
+      },
+    }),
+  ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.sub = user.id;
+        token.role = user.role;
+        delete token.picture;
+        delete token.image;
+      }
+      return token;
     },
-    pages: {
-        signIn: '/login',
+    async session({ session, token }) {
+      if (token.sub && session.user) {
+        session.user.id = token.sub;
+        session.user.role = token.role;
+        // Não repassamos imagem via sessão para manter o cookie leve
+      }
+      return session;
     },
-});
+  },
+})

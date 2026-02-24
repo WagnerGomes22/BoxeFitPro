@@ -30,7 +30,8 @@ function Calendar({
         className
       )}
       classNames={{
-        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+        months:
+          "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
         caption: "flex justify-center pt-1 relative items-center",
         caption_label: "text-sm font-medium hidden",
@@ -39,15 +40,14 @@ function Calendar({
           "h-7 w-7 bg-transparent pl-0 hover:!bg-transparent hover:!text-gray-400",
         table: "w-full border-collapse space-y-1",
         head_row: "flex",
-        head_cell: "text-gray-400 rounded-md w-9 font-normal text-[0.8rem]",
+        head_cell:
+          "text-gray-400 rounded-md w-9 font-normal text-[0.8rem]",
         row: "flex w-full mt-2",
         cell:
           "h-9 w-9 text-center text-sm p-0 relative " +
-          "[&:has([aria-selected])]:bg-red-600/20 " +
-          "first:[&:has([aria-selected])]:rounded-l-md " +
-          "last:[&:has([aria-selected])]:rounded-r-md " +
           "focus-within:relative focus-within:z-20",
-        day: "h-9 w-9 p-0 font-normal text-gray-200 hover:text-black hover:bg-gray-600 rounded-md",
+        day:
+          "h-9 w-9 p-0 font-normal text-gray-200 hover:text-black hover:bg-gray-600 rounded-md",
         day_selected:
           "bg-red-600 text-red-50 hover:bg-red-700 focus:bg-red-700",
         day_today: "bg-gray-700 text-gray-100",
@@ -57,35 +57,50 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        Caption: CustomCaption,
+        Caption: OptimizedCaption,
       }}
       {...props}
     />
   );
 }
+
 Calendar.displayName = "Calendar";
 
-function CustomCaption() {
+/* ------------------------------------------------------------------ */
+/* Caption otimizado SEM perder o shadcn Select                        */
+/* ------------------------------------------------------------------ */
+
+const OptimizedCaption = React.memo(function OptimizedCaption() {
   const { goToMonth, currentMonth } = useNavigation();
   const { fromYear, toYear } = useDayPicker();
 
+  const years = React.useMemo(() => {
+    const start = fromYear ?? 1970;
+    const end = toYear ?? new Date().getFullYear();
+
+    return Array.from(
+      { length: end - start + 1 },
+      (_, i) => start + i
+    ).reverse();
+  }, [fromYear, toYear]);
+
+  const monthLabels = React.useMemo(() => {
+    return Array.from({ length: 12 }, (_, month) =>
+      format(new Date(2024, month, 1), "MMMM", { locale: ptBR })
+    );
+  }, []);
+
   const handleYearChange = (value: string) => {
     const newDate = new Date(currentMonth);
-    newDate.setFullYear(parseInt(value, 10));
+    newDate.setFullYear(Number(value));
     goToMonth(newDate);
   };
 
   const handleMonthChange = (value: string) => {
     const newDate = new Date(currentMonth);
-    newDate.setMonth(parseInt(value, 10));
+    newDate.setMonth(Number(value));
     goToMonth(newDate);
   };
-
-  const years = Array.from(
-    { length: (toYear ?? new Date().getFullYear()) - (fromYear ?? 1970) + 1 },
-    (_, i) => (fromYear ?? 1970) + i
-  ).reverse();
-  const months = Array.from({ length: 12 }, (_, i) => i);
 
   return (
     <div className="flex justify-center items-center space-x-2 mb-4">
@@ -113,17 +128,15 @@ function CustomCaption() {
           <SelectValue placeholder="Mês" />
         </SelectTrigger>
         <SelectContent>
-          {months.map((month) => (
-            <SelectItem key={month} value={month.toString()}>
-              {format(new Date(currentMonth.getFullYear(), month), "MMMM", {
-                locale: ptBR,
-              })}
+          {monthLabels.map((label, index) => (
+            <SelectItem key={index} value={index.toString()}>
+              {label}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
     </div>
   );
-}
+});
 
 export { Calendar };
