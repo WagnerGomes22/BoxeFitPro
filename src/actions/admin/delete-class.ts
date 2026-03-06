@@ -11,10 +11,19 @@ export async function deleteClass(classId: string) {
   }
 
   try {
-    // Verificar se tem bookings ativos?
-    // O Prisma tem onDelete: Cascade nos Bookings? Sim, verifiquei antes.
-    // Mas seria bom verificar se a aula já aconteceu (passado).
-    // Para simplificar MVP: deleta tudo.
+    // Verificar se a aula existe e pertence ao instrutor (se não for admin)
+    const classToDelete = await prisma.class.findUnique({
+      where: { id: classId },
+      select: { instructorId: true },
+    });
+
+    if (!classToDelete) {
+      return { success: false, message: "Aula não encontrada." };
+    }
+
+    if (session.user.role !== "ADMIN" && classToDelete.instructorId !== session.user.id) {
+      return { success: false, message: "Você só pode cancelar suas próprias aulas." };
+    }
 
     await prisma.class.delete({
       where: { id: classId },

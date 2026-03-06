@@ -43,6 +43,13 @@ const BemVindo = () => {
       </div>
 
       <div className="flex w-full flex-col justify-center bg-white p-8 md:w-1/2 md:p-12 lg:p-24 relative">
+        {/* Botão de Login no Topo */}
+        <div className="absolute top-6 right-6 md:top-8 md:right-8">
+          <Button asChild variant="ghost" className="font-semibold text-zinc-600 hover:text-red-600 hover:bg-red-50">
+            <Link href="/login">Entrar</Link>
+          </Button>
+        </div>
+
         <div className="w-full max-w-lg mx-auto">
           <div className="flex items-center">
             <h2 className="mb-3 text-2xl font-medium text-gray-800 md:text-2xl">

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Menu, Home, Calendar, Activity, User, LogOut } from "lucide-react";
+import { Menu, Home, Calendar, Activity, User, LogOut, Dumbbell } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ export function MobileNav({ user }: MobileNavProps) {
   const links = [
     { href: "/dashboard", label: "MINHAS AULAS", icon: Home },
     { href: "/dashboard/agendar", label: "AGENDAR TREINO", icon: Calendar },
+    { href: "/dashboard/sparring", label: "SPARRING", icon: Dumbbell },
     { href: "/dashboard/progresso", label: "MEU PROGRESSO", icon: Activity },
     { href: "/dashboard/perfil", label: "PERFIL", icon: User },
   ];

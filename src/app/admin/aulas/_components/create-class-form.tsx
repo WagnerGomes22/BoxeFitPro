@@ -51,22 +51,25 @@ export function CreateClassForm({ instructors }: { instructors: Instructor[] }) 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg border border-zinc-200 shadow-sm">
+    <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg border border-zinc-200 shadow-sm w-full">
       <div className="space-y-2">
-        <Label htmlFor="name">Nome da Aula</Label>
-        <Input 
-          id="name" 
-          name="name" 
-          placeholder="Ex: Boxe Iniciante" 
-          required 
-          className="max-w-md"
-        />
+        <Label htmlFor="name">Modalidade</Label>
+        <Select name="name" required>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Selecione a modalidade" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Escola de Boxe">Escola de Boxe</SelectItem>
+            <SelectItem value="Sparring">Sparring</SelectItem>
+            <SelectItem value="Funcional">Funcional</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="instructorId">Instrutor</Label>
         <Select name="instructorId" required>
-          <SelectTrigger className="max-w-md">
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecione um instrutor" />
           </SelectTrigger>
           <SelectContent>
@@ -79,7 +82,7 @@ export function CreateClassForm({ instructors }: { instructors: Instructor[] }) 
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
         <div className="space-y-2">
           <Label htmlFor="date">Data</Label>
           <Input 
@@ -87,6 +90,7 @@ export function CreateClassForm({ instructors }: { instructors: Instructor[] }) 
             name="date" 
             type="date" 
             required 
+            className="w-full"
           />
         </div>
         <div className="space-y-2">
@@ -98,11 +102,12 @@ export function CreateClassForm({ instructors }: { instructors: Instructor[] }) 
                 min="1" 
                 defaultValue="20"
                 required 
+                className="w-full"
             />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 max-w-md">
+      <div className="grid grid-cols-2 gap-4 w-full">
         <div className="space-y-2">
           <Label htmlFor="startTime">Início</Label>
           <Input 
@@ -110,6 +115,7 @@ export function CreateClassForm({ instructors }: { instructors: Instructor[] }) 
             name="startTime" 
             type="time" 
             required 
+            className="w-full"
           />
         </div>
         <div className="space-y-2">
@@ -119,17 +125,18 @@ export function CreateClassForm({ instructors }: { instructors: Instructor[] }) 
             name="endTime" 
             type="time" 
             required 
+            className="w-full"
           />
         </div>
       </div>
 
-      <div className="space-y-2 max-w-md">
+      <div className="space-y-2 w-full">
         <Label htmlFor="description">Descrição (Opcional)</Label>
         <Textarea 
             id="description" 
             name="description" 
             placeholder="Detalhes sobre a aula, equipamentos necessários, etc."
-            className="min-h-[100px]"
+            className="min-h-[100px] w-full"
         />
       </div>
 

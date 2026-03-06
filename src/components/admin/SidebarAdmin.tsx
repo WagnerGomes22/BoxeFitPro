@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, CalendarDays, LogOut, ExternalLink, Users } from "lucide-react";
+import { LayoutDashboard, CalendarDays, LogOut, ExternalLink, Users, Dumbbell } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,7 @@ export function SidebarAdmin({ user }: SidebarAdminProps) {
     { href: "/admin", label: "DASHBOARD", icon: LayoutDashboard },
     { href: "/admin/aulas", label: "GESTÃO DE AULAS", icon: CalendarDays },
     { href: "/admin/usuarios", label: "USUÁRIOS", icon: Users },
+    { href: "/admin/sparring", label: "SPARRING", icon: Dumbbell },
   ];
 
   return (

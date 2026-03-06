@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, LogIn } from "lucide-react";
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { toast } from "sonner";
 // import { getUserRole } from '@/actions/user/get-role'; // REMOVIDO PARA EVITAR ERROS DE HIDRATAÇÃO/NETWORK
 
@@ -90,7 +91,7 @@ export default function Login() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password" className="text-xs uppercase tracking-widest text-neutral-500 font-bold">Senha</Label>
-                <a href="#" className="text-[10px] text-red-500 hover:text-red-400 font-bold uppercase tracking-wider">Esqueceu?</a>
+                <Link href="/auth/esqueci-senha" className="text-[10px] text-red-500 hover:text-red-400 font-bold uppercase tracking-wider">Esqueceu?</Link>
               </div>
               <Input
                 id="password"

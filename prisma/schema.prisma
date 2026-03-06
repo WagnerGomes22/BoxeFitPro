@@ -28,42 +28,54 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
-  
+
   // Dados Pessoais (Opcionais no cadastro inicial via OAuth)
-  cpf           String?    @unique
-  phone         String?
-  birthDate     DateTime?
-  role          Role      @default(STUDENT)
-  
+  cpf       String?   @unique
+  phone     String?
+  birthDate DateTime?
+  role      Role      @default(STUDENT)
+
   // NextAuth
-  accounts      Account[]
-  sessions      Session[]
+  accounts Account[]
+  sessions Session[]
 
   // Relacionamentos
-  addresses     Address[]
-  subscriptions Subscription[]
+  addresses         Address[]
+  subscriptions     Subscription[]
   emergencyContacts EmergencyContact[]
-  
-  classesGiven  Class[]    @relation("InstructorClasses")
-  bookings      Booking[]
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  classesGiven   Class[]   @relation("InstructorClasses")
+  bookings       Booking[]
+  markedBookings Booking[] @relation("AttendanceAuditor")
+
+  // Sparring Relations
+  sparringProfile           SparringProfile?
+  sparringRequestsSent      SparringRequest[] @relation("SparringRequestsSent")
+  sparringRequestsReceived  SparringRequest[] @relation("SparringRequestsReceived")
+  sparringMatchesA          SparringMatch[]   @relation("SparringMatchesA")
+  sparringMatchesB          SparringMatch[]   @relation("SparringMatchesB")
+  
+  // Como Instrutor (Sparring)
+  sparringEvaluationsGiven  SparringProfile[] @relation("InstructorEvaluator")
+  sparringMatchesSupervised SparringMatch[]   @relation("MatchSupervisor")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -87,78 +99,83 @@ model VerificationToken {
 }
 
 model Address {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  cep         String
-  street      String
-  number      String
-  complement  String?
-  district    String
-  city        String
-  state       String
-  active      Boolean  @default(true) // Define qual é o endereço atual
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime @default(now())
+  cep        String
+  street     String
+  number     String
+  complement String?
+  district   String
+  city       String
+  state      String
+  active     Boolean @default(true) // Define qual é o endereço atual
+
+  createdAt DateTime @default(now())
 }
 
 model EmergencyContact {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  name        String
-  phone       String
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime @default(now())
+  name  String
+  phone String
+
+  createdAt DateTime @default(now())
 }
 
 model Subscription {
-  id                   String             @id @default(uuid())
-  userId               String
-  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  planName             String             // Ex: "Boxe Premium"
-  stripePriceId        String
-  status               SubscriptionStatus @default(PENDING)
-  
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  planName      String // Ex: "Boxe Premium"
+  stripePriceId String
+  status        SubscriptionStatus @default(PENDING)
+
   stripeCheckoutSessionId String?
   stripeCustomerId        String?
   stripeSubscriptionId    String?   @unique
   currentPeriodEnd        DateTime?
-  
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Class {
-  id          String   @id @default(uuid())
-  name        String   // Ex: "Boxe Iniciante", "Muay Thai"
-  description String?
+  id           String  @id @default(uuid())
+  name         String // Ex: "Boxe Iniciante", "Muay Thai"
+  description  String?
   instructorId String
-  instructor   User     @relation("InstructorClasses", fields: [instructorId], references: [id])
-  
-  startTime   DateTime
-  endTime     DateTime
-  capacity    Int      // Limite de alunos
-  
-  bookings    Booking[]
+  instructor   User    @relation("InstructorClasses", fields: [instructorId], references: [id])
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  startTime DateTime
+  endTime   DateTime
+  capacity  Int // Limite de alunos
+
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Booking {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  classId   String
-  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
-  
-  status    BookingStatus @default(CONFIRMED)
-  
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  classId String
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  status BookingStatus @default(CONFIRMED)
+
+  // Auditoria de Presença
+  attendedAt           DateTime?
+  attendanceMarkedById String?
+  attendanceMarkedBy   User?     @relation("AttendanceAuditor", fields: [attendanceMarkedById], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -170,4 +187,95 @@ enum BookingStatus {
   CANCELED
   ATTENDED
   NO_SHOW
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  email     String
+  tokenHash String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([email, tokenHash])
+}
+
+enum SparringIntensity {
+  LIGHT
+  MODERATE
+  HARD
+}
+
+enum SparringRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELED
+}
+
+enum SparringMatchStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+}
+
+model SparringProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  weight      Float
+  height      Float
+  age         Int
+  objective   String
+  intensity   SparringIntensity @default(MODERATE)
+  
+  isReady       Boolean @default(false)
+  acceptedTerms Boolean @default(false)
+  
+  instructorId String?
+  instructor   User?   @relation("InstructorEvaluator", fields: [instructorId], references: [id])
+  
+  notes        String? 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SparringRequest {
+  id String @id @default(uuid())
+
+  requesterId String
+  requester   User   @relation("SparringRequestsSent", fields: [requesterId], references: [id], onDelete: Cascade)
+
+  targetId String
+  target   User   @relation("SparringRequestsReceived", fields: [targetId], references: [id], onDelete: Cascade)
+
+  status        SparringRequestStatus @default(PENDING)
+  scheduledDate DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SparringMatch {
+  id String @id @default(uuid())
+
+  date DateTime
+  
+  studentAId String
+  studentA   User   @relation("SparringMatchesA", fields: [studentAId], references: [id], onDelete: Cascade)
+  
+  studentBId String
+  studentB   User   @relation("SparringMatchesB", fields: [studentBId], references: [id], onDelete: Cascade)
+
+  status SparringMatchStatus @default(SCHEDULED)
+  result String?
+
+  intensity    SparringIntensity?
+  notes        String?
+  instructorId String?
+  instructor   User?   @relation("MatchSupervisor", fields: [instructorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

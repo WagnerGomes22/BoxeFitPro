@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Calendar, Activity, User, LogOut, Dumbbell } from "lucide-react";
+import { Home, Calendar, Activity, User, LogOut, Dumbbell, CalendarDays } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,8 @@ export function Sidebar({ user }: SidebarProps) {
   const links = [
     { href: "/dashboard", label: "MINHAS AULAS", icon: Home },
     { href: "/dashboard/agendar", label: "AGENDAR TREINO", icon: Calendar },
+    { href: "/dashboard/grade", label: "GRADE DE HORÁRIOS", icon: CalendarDays },
+    { href: "/dashboard/sparring", label: "SPARRING", icon: Dumbbell },
     { href: "/dashboard/progresso", label: "MEU PROGRESSO", icon: Activity },
     { href: "/dashboard/perfil", label: "PERFIL", icon: User },
   ];

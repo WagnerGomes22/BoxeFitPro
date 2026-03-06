@@ -3,8 +3,10 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getAdminClasses } from "@/actions/admin/get-classes";
 import { AdminClassTable } from "./_components/class-table";
+import { auth } from "@/auth";
 
 export default async function AdminClassesPage() {
+  const session = await auth();
   const classes = await getAdminClasses();
 
   return (
@@ -21,7 +23,11 @@ export default async function AdminClassesPage() {
         </Button>
       </div>
 
-      <AdminClassTable classes={classes} />
+      <AdminClassTable 
+        classes={classes} 
+        currentUserId={session?.user?.id}
+        currentUserRole={session?.user?.role}
+      />
     </div>
   );
 }

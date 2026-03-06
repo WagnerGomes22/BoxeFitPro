@@ -71,6 +71,29 @@ export async function getDashboardData() {
     take: 5,
   });
 
+  // 2.1 Buscar próximos sparrings (Futuros e agendados)
+  const upcomingSparringsRaw = await prisma.sparringMatch.findMany({
+    where: {
+      OR: [
+        { studentAId: userId },
+        { studentBId: userId },
+      ],
+      status: "SCHEDULED",
+      date: {
+        gte: now,
+      },
+    },
+    include: {
+      studentA: { select: { name: true } },
+      studentB: { select: { name: true } },
+      instructor: { select: { name: true } },
+    },
+    orderBy: {
+      date: "asc",
+    },
+    take: 5,
+  });
+
   // 3. Buscar histórico recente (Passadas) para lista e cálculos
   const pastBookingsRaw = await prisma.booking.findMany({
     where: {
@@ -163,8 +186,9 @@ export async function getDashboardData() {
   }
 
   // 5. Transformar dados para o formato da UI
-  const upcomingClasses = upcomingBookingsRaw.map((booking) => ({
+  const upcomingClassesMapped = upcomingBookingsRaw.map((booking) => ({
     id: booking.id,
+    dateObj: booking.class.startTime, // Auxiliar para ordenação
     formattedDate: format(booking.class.startTime, "dd MMM", { locale: ptBR }).toUpperCase(),
     class: {
       name: booking.class.name,
@@ -177,6 +201,31 @@ export async function getDashboardData() {
       },
     },
   }));
+
+  const upcomingSparringsMapped = upcomingSparringsRaw.map((match) => {
+    const opponentName = match.studentAId === userId ? match.studentB.name : match.studentA.name;
+    return {
+      id: match.id,
+      dateObj: match.date, // Auxiliar para ordenação
+      formattedDate: format(match.date, "dd MMM", { locale: ptBR }).toUpperCase(),
+      class: {
+        name: `Sparring vs ${opponentName}`,
+        level: "Avançado" as const,
+        instructor: match.instructor?.name || "A definir",
+        time: format(match.date, "HH:mm"),
+        capacity: 2,
+        _count: {
+          bookings: 2,
+        },
+      },
+    };
+  });
+
+  // Mesclar e ordenar por data
+  const upcomingClasses = [...upcomingClassesMapped, ...upcomingSparringsMapped]
+    .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime())
+    .slice(0, 5) // Pegar apenas os 5 primeiros combinados
+    .map(({ dateObj, ...rest }) => rest); // Remover o auxiliar dateObj
 
   const pastClasses = pastBookingsRaw.slice(0, 5).map((booking) => ({ // Apenas as 5 últimas para a lista
     id: booking.id,
