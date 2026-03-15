@@ -7,23 +7,40 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-// Componente interno que usa useSearchParams
 const SucessoContent = () => {
     const searchParams = useSearchParams();
     const sessionId = searchParams.get('session_id');
     
-    // Apenas para demonstração, em um caso real você poderia buscar detalhes da sessão
-    const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+    const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'processing'>(() => (
+        sessionId ? "loading" : "error"
+    ));
 
     useEffect(() => {
-        if (sessionId) {
-            // Aqui você poderia fazer uma chamada a uma API para verificar o status da sessão no backend
-            // e garantir que o pagamento foi realmente efetuado antes de mostrar a mensagem de sucesso.
-            // Por simplicidade, vamos apenas simular um sucesso.
-            setStatus('success');
-        } else {
-            setStatus('error');
-        }
+        if (!sessionId) return;
+
+        const checkStatus = async () => {
+            try {
+                const response = await fetch(`/api/subscription/status?session_id=${sessionId}`);
+                if (!response.ok) {
+                    setStatus('error');
+                    return;
+                }
+                const data = await response.json();
+                if (data.status === 'ACTIVE') {
+                    setStatus('success');
+                    return;
+                }
+                if (data.status === 'PENDING') {
+                    setStatus('processing');
+                    return;
+                }
+                setStatus('error');
+            } catch {
+                setStatus('error');
+            }
+        };
+
+        checkStatus();
     }, [sessionId]);
 
     return (
@@ -32,6 +49,7 @@ const SucessoContent = () => {
                 <CardTitle className="text-2xl font-bold">
                     {status === 'success' && 'Pagamento Aprovado!'}
                     {status === 'loading' && 'Verificando Pagamento...'}
+                    {status === 'processing' && 'Pagamento em Processamento'}
                     {status === 'error' && 'Ocorreu um Problema'}
                 </CardTitle>
             </CardHeader>
@@ -42,11 +60,19 @@ const SucessoContent = () => {
                         <p className="text-muted-foreground">Aguarde um momento enquanto confirmamos sua inscrição.</p>
                     </>
                 )}
+                {status === 'processing' && (
+                    <>
+                        <Loader2 className="h-16 w-16 text-primary animate-spin" />
+                        <p className="text-muted-foreground">
+                            Seu pagamento ainda está sendo processado. Volte ao painel em instantes.
+                        </p>
+                    </>
+                )}
                 {status === 'success' && (
                     <>
                         <CheckCircle2 className="h-16 w-16 text-green-500" />
                         <p className="text-muted-foreground">
-                            Sua inscrição foi concluída com sucesso. Seja bem-vindo(a) ao Boxe Pass!
+                            Sua inscrição foi concluída com sucesso. Seja bem-vindo(a) ao BoxeFit Pro!
                             Você receberá um e-mail com os próximos passos.
                         </p>
                         <p className="text-xs text-gray-500 pt-4">
@@ -70,7 +96,6 @@ const SucessoContent = () => {
     );
 };
 
-// Componente da página principal que envolve com Suspense
 export default function SucessoPage() {
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">

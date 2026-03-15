@@ -1,14 +1,12 @@
 
 import { getProfile } from "@/actions/user/get-profile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { User, Phone, Calendar, MapPin, ShieldAlert } from "lucide-react";
 import { format } from "date-fns";
 import { PlanSection } from "@/components/profile/PlanSection";
 import { ImageUpload } from "@/components/profile/ImageUpload";
-import { ptBR } from "date-fns/locale";
 
 export default async function ProfilePage() {
   const user = await getProfile();
@@ -96,7 +94,7 @@ export default async function ProfilePage() {
                     <p className="text-right text-muted-foreground leading-relaxed">
                       {address.street}, {address.number}
                       <br />
-                      {address.district}, {address.city} - {address.state}
+                      {address.district}, {address.city}
                       <br />
                       CEP: {address.cep}
                     </p>

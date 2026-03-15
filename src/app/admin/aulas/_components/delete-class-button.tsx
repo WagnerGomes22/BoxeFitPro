@@ -29,7 +29,7 @@ export function DeleteClassButton({ classId }: { classId: string }) {
       } else {
         toast.error(result.message);
       }
-    } catch (error) {
+    } catch {
       toast.error("Erro ao tentar excluir.");
     } finally {
       setIsDeleting(false);

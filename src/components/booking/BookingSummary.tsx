@@ -77,7 +77,7 @@ export function BookingSummary({
             <div className="flex items-start gap-3 opacity-60">
                 <MapPin className="h-4 w-4 text-neutral-400 mt-0.5" />
                 <div>
-                    <p className="text-xs font-bold text-white">BoxePass Arena</p>
+                    <p className="text-xs font-bold text-white">BoxeFit Pro Arena</p>
                     <p className="text-[10px] text-neutral-400">Rua dos Campeões, 100 - Centro</p>
                 </div>
             </div>

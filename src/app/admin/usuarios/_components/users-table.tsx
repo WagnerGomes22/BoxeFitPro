@@ -24,13 +24,27 @@ import { toast } from "sonner";
 import { updateUserRole } from "@/actions/admin/update-user-role";
 import { useRouter } from "next/navigation";
 
+type UserRole = "ADMIN" | "INSTRUCTOR" | "STUDENT";
+type RoleFilter = "ALL" | UserRole;
+
+interface UserRow {
+  id: string;
+  name: string | null;
+  email: string;
+  image: string | null;
+  role: UserRole;
+  _count: {
+    bookings: number;
+  };
+}
+
 interface UsersTableProps {
-  users: any[];
+  users: UserRow[];
 }
 
 export function UsersTable({ users }: UsersTableProps) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [roleFilter, setRoleFilter] = useState<"ALL" | "ADMIN" | "INSTRUCTOR" | "STUDENT">("ALL");
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>("ALL");
   const router = useRouter();
 
   const filteredUsers = users.filter((user) => {
@@ -48,7 +62,7 @@ export function UsersTable({ users }: UsersTableProps) {
       } else {
         toast.error(result.message);
       }
-    } catch (error) {
+    } catch {
       toast.error("Erro ao atualizar permissão.");
     } finally {
       setLoadingId(null);
@@ -64,7 +78,7 @@ export function UsersTable({ users }: UsersTableProps) {
           <span className="text-sm font-medium text-muted-foreground">Filtrar por:</span>
           <Select
             value={roleFilter}
-            onValueChange={(value) => setRoleFilter(value as any)}
+            onValueChange={(value) => setRoleFilter(value as RoleFilter)}
           >
             <SelectTrigger className="w-[180px] h-8">
               <SelectValue placeholder="Todos os usuários" />

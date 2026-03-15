@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -106,7 +106,7 @@ export function ResetForm() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
           <h1 className="text-4xl font-black italic tracking-tighter mb-2">
-            BOXE<span className="text-red-600">_PASS</span>
+            BoxeFit<span className="text-red-600"> Pro</span>
           </h1>
           <p className="text-neutral-400 text-sm">Defina sua nova senha.</p>
         </div>

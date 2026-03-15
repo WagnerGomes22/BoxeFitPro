@@ -49,10 +49,10 @@ export function AttendanceList({ initialBookings, isLocked }: AttendanceListProp
       
       toast.success('Presença atualizada!');
 
-    } catch (error: any) {
-      // Reverter em caso de erro
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erro ao atualizar presença.";
       setBookings(previousBookings);
-      toast.error(error.message || 'Erro ao atualizar presença.');
+      toast.error(message);
     } finally {
       setLoadingId(null);
     }

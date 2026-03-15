@@ -76,7 +76,7 @@ export function OperationalList({ nextClasses, alerts }: OperationalListProps) {
                     </TableCell>
                     <TableCell className="text-right">
                       {aula.status === "COMPLETED" ? (
-                        <Badge variant="secondary" className="bg-zinc-100 text-zinc-400 hover:bg-zinc-100 font-normal">
+                        <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-200 border-green-200 font-normal">
                           Concluída
                         </Badge>
                       ) : aula.status === "ONGOING" ? (

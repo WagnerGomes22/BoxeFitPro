@@ -59,7 +59,7 @@ export function EditClassForm({
       } else {
         toast.error(result.message);
       }
-    } catch (error) {
+    } catch {
       toast.error("Erro inesperado ao atualizar aula.");
     } finally {
       setIsPending(false);

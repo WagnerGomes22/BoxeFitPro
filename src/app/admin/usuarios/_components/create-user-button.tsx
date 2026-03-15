@@ -45,7 +45,7 @@ export function CreateUserButton() {
       } else {
         toast.error(result.message);
       }
-    } catch (error) {
+    } catch {
       toast.error("Erro inesperado ao criar usuário.");
     } finally {
       setLoading(false);
@@ -64,7 +64,7 @@ export function CreateUserButton() {
           <DialogTitle>Criar Novo Usuário</DialogTitle>
           <DialogDescription>
             Crie uma conta manualmente para um membro da equipe ou instrutor.
-            A senha padrão será "123456" e deve ser alterada no primeiro acesso.
+            A senha padrão será &quot;123456&quot; e deve ser alterada no primeiro acesso.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">

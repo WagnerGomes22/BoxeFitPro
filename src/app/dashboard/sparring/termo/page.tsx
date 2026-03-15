@@ -48,7 +48,7 @@ export default function SparringTermPage() {
               <strong>6. ISENÇÃO DE RESPONSABILIDADE:</strong> O aluno isenta a academia, seus proprietários, instrutores e funcionários de qualquer responsabilidade civil ou criminal por lesões ou danos decorrentes da prática de sparring, exceto em casos de dolo comprovado.
             </p>
             <p className="mt-8 text-center font-bold text-muted-foreground">
-              Ao marcar a opção "Aceito o Termo" no seu perfil, você confirma ter lido, compreendido e concordado com todos os itens acima.
+              Ao marcar a opção &quot;Aceito o Termo&quot; no seu perfil, você confirma ter lido, compreendido e concordado com todos os itens acima.
             </p>
           </ScrollArea>
         </CardContent>

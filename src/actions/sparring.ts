@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { SparringIntensity, SparringRequestStatus, SparringMatchStatus } from "@prisma/client";
+import { Prisma, SparringIntensity, SparringRequestStatus, SparringMatchStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 // --- Profile Actions ---
@@ -88,7 +88,7 @@ export async function findSparringPartners(filters?: {
   // 3. Não são o próprio usuário
   // 4. Aceitaram os termos
 
-  const whereClause: any = {
+  const whereClause: Prisma.SparringProfileWhereInput = {
     isReady: true,
     acceptedTerms: true,
     userId: { not: session.user.id },

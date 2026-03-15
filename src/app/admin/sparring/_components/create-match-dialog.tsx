@@ -181,7 +181,6 @@ export function CreateMatchDialog({ profiles }: { profiles: SparringProfile[] })
                     disabled={(date) =>
                       date < new Date(new Date().setHours(0, 0, 0, 0))
                     }
-                    locale={ptBR}
                     initialFocus
                     captionLayout="dropdown"
                     fromYear={1900}

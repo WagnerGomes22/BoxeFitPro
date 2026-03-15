@@ -1,64 +1,64 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 import { addDays, setHours, setMinutes, startOfToday } from "date-fns";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+type ClassType = {
+  name: string;
+  duration: number;
+  description: string;
+};
+
 async function main() {
   console.log("🌱 Iniciando o seed...");
 
-  // 1. Criar ou Encontrar Professor
-  const instructorEmail = "carlos.silva@boxefit.com";
-  
-  let instructor = await prisma.user.findUnique({
-    where: { email: instructorEmail },
+  const seedPassword = process.env.SEED_DEFAULT_PASSWORD;
+  if (!seedPassword) {
+    throw new Error("SEED_DEFAULT_PASSWORD não configurado");
+  }
+  const hashedPassword = await bcrypt.hash(seedPassword, 10);
+
+  await upsertUser({
+    name: "Admin BoxePass",
+    email: "admin@boxepass.com",
+    password: hashedPassword,
+    cpf: "000.111.222-33",
+    phone: "(11) 90000-0000",
+    birthDate: new Date("1980-01-01"),
+    role: Role.ADMIN,
   });
 
-  if (!instructor) {
-    console.log("👤 Criando professor padrão...");
-    instructor = await prisma.user.create({
-      data: {
-        name: "Carlos Silva",
-        email: instructorEmail,
-        cpf: "123.456.789-00",
-        phone: "(11) 99999-9999",
-        birthDate: new Date("1985-05-20"),
-        role: "INSTRUCTOR",
-      },
-    });
-  }
-
-  // 2. Criar Usuário Aluno para Teste
-  const studentEmail = "aluno@boxepass.com";
-  const hashedPassword = await bcrypt.hash("123456", 10);
-
-  let student = await prisma.user.findUnique({
-    where: { email: studentEmail },
+  const instructor = await upsertUser({
+    name: "Carlos Silva",
+    email: "carlos.silva@boxefit.com",
+    password: hashedPassword,
+    cpf: "123.456.789-00",
+    phone: "(11) 99999-9999",
+    birthDate: new Date("1985-05-20"),
+    role: Role.INSTRUCTOR,
   });
 
-  if (!student) {
-    console.log("Criando aluno de teste (aluno@boxepass.com / 123456)...");
-    student = await prisma.user.create({
-      data: {
-        name: "João Boxeador",
-        email: studentEmail,
-        password: hashedPassword,
-        cpf: "111.222.333-44",
-        phone: "(11) 98888-7777",
-        birthDate: new Date("1995-01-01"),
-        role: "STUDENT",
-      },
-    });
-  } else {
-    // Atualizar senha se já existir
-    await prisma.user.update({
-        where: { email: studentEmail },
-        data: { password: hashedPassword }
-    });
-    console.log("Senha do aluno de teste atualizada.");
-  }
+  await upsertUser({
+    name: "João Boxeador",
+    email: "aluno@boxepass.com",
+    password: hashedPassword,
+    cpf: "111.222.333-44",
+    phone: "(11) 98888-7777",
+    birthDate: new Date("1995-01-01"),
+    role: Role.STUDENT,
+  });
 
-  // 3. Limpar aulas futuras para evitar duplicidade no seed
+  await upsertUser({
+    name: "Maria Sparring",
+    email: "maria@boxepass.com",
+    password: hashedPassword,
+    cpf: "222.333.444-55",
+    phone: "(11) 97777-6666",
+    birthDate: new Date("1998-06-15"),
+    role: Role.STUDENT,
+  });
+
   await prisma.class.deleteMany({
     where: {
       instructorId: instructor.id,
@@ -66,44 +66,36 @@ async function main() {
   });
   console.log("🧹 Aulas antigas limpas.");
 
-  // 4. Gerar Grade de Aulas (Boxe Apenas)
   const today = startOfToday();
   const classesToCreate = [];
 
-  const classTypes = [
+  const classTypes: ClassType[] = [
     { name: "Boxe Iniciante", duration: 60, description: "Fundamentos do boxe para quem está começando." },
     { name: "Boxe Técnico", duration: 90, description: "Foco em técnica, esquiva e movimentação." },
     { name: "Boxe Funcional", duration: 60, description: "Mistura de boxe com exercícios funcionais intensos." },
     { name: "Sparring (Boxe)", duration: 90, description: "Treino prático de combate (com proteção)." },
   ];
 
-  // Gerar aulas para os próximos 30 dias
   for (let i = 0; i < 30; i++) {
     const currentDate = addDays(today, i);
-    const dayOfWeek = currentDate.getDay(); // 0 = Domingo, 6 = Sábado
+    const dayOfWeek = currentDate.getDay();
 
-    // Pular Domingos (Academia fechada)
     if (dayOfWeek === 0) continue;
 
-    // Horários de semana
     if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-      // Manhã
-      classesToCreate.push(createClassData(currentDate, 7, 0, classTypes[2], instructor.id)); // 07:00 Funcional
-      classesToCreate.push(createClassData(currentDate, 8, 0, classTypes[0], instructor.id)); // 08:00 Iniciante
+      classesToCreate.push(createClassData(currentDate, 7, 0, classTypes[2], instructor.id));
+      classesToCreate.push(createClassData(currentDate, 8, 0, classTypes[0], instructor.id));
       
-      // Noite
-      classesToCreate.push(createClassData(currentDate, 18, 0, classTypes[0], instructor.id)); // 18:00 Iniciante
-      classesToCreate.push(createClassData(currentDate, 19, 0, classTypes[1], instructor.id)); // 19:00 Técnico
-      classesToCreate.push(createClassData(currentDate, 20, 0, classTypes[3], instructor.id)); // 20:00 Sparring
+      classesToCreate.push(createClassData(currentDate, 18, 0, classTypes[0], instructor.id));
+      classesToCreate.push(createClassData(currentDate, 19, 0, classTypes[1], instructor.id));
+      classesToCreate.push(createClassData(currentDate, 20, 0, classTypes[3], instructor.id));
     } 
-    // Sábados
     else if (dayOfWeek === 6) {
-      classesToCreate.push(createClassData(currentDate, 9, 0, classTypes[2], instructor.id)); // 09:00 Funcional
-      classesToCreate.push(createClassData(currentDate, 10, 30, classTypes[3], instructor.id)); // 10:30 Sparring
+      classesToCreate.push(createClassData(currentDate, 9, 0, classTypes[2], instructor.id));
+      classesToCreate.push(createClassData(currentDate, 10, 30, classTypes[3], instructor.id));
     }
   }
 
-  // Inserir no banco
   for (const classData of classesToCreate) {
     await prisma.class.create({ data: classData });
   }
@@ -111,7 +103,31 @@ async function main() {
   console.log(`✅ ${classesToCreate.length} aulas de Boxe criadas com sucesso!`);
 }
 
-function createClassData(date: Date, hour: number, minute: number, type: any, instructorId: string) {
+async function upsertUser(data: {
+  name: string;
+  email: string;
+  password: string;
+  cpf: string;
+  phone: string;
+  birthDate: Date;
+  role: Role;
+}) {
+  const user = await prisma.user.upsert({
+    where: { email: data.email },
+    update: {
+      name: data.name,
+      password: data.password,
+      cpf: data.cpf,
+      phone: data.phone,
+      birthDate: data.birthDate,
+      role: data.role,
+    },
+    create: data,
+  });
+  return user;
+}
+
+function createClassData(date: Date, hour: number, minute: number, type: ClassType, instructorId: string) {
   const startTime = setMinutes(setHours(date, hour), minute);
   const endTime = setMinutes(startTime, startTime.getMinutes() + type.duration);
 

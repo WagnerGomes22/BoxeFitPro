@@ -51,6 +51,22 @@ export async function bookClass(classId: string): Promise<BookingResult> {
       return { success: false, message: "Aula não encontrada." };
     }
 
+    const isSparringClass = classData.name.toLowerCase().includes("sparring");
+
+    if (isSparringClass) {
+      const sparringProfile = await prisma.sparringProfile.findUnique({
+        where: { userId },
+        select: { id: true },
+      });
+
+      if (!sparringProfile) {
+        return {
+          success: false,
+          message: "Para participar de sparring, crie seu perfil na sessão de Sparring primeiro.",
+        };
+      }
+    }
+
     // 2. Verificar se está cheia
     if (classData._count.bookings >= classData.capacity) {
       return { success: false, message: "Esta aula está lotada." };

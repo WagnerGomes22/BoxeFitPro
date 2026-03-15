@@ -22,8 +22,23 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+interface ClassRow {
+  id: string;
+  name: string;
+  startTime: Date | string;
+  endTime: Date | string;
+  capacity: number;
+  instructorId: string;
+  instructor: {
+    name: string | null;
+  };
+  _count: {
+    bookings: number;
+  };
+}
+
 interface AdminClassTableProps {
-  classes: any[];
+  classes: ClassRow[];
   currentUserId?: string;
   currentUserRole?: string;
 }
@@ -51,7 +66,7 @@ export function AdminClassTable({ classes, currentUserId, currentUserRole }: Adm
               </TableCell>
             </TableRow>
           ) : (
-            classes.map((aula: any) => {
+            classes.map((aula) => {
               const canManage = currentUserRole === 'ADMIN' || (currentUserId && aula.instructorId === currentUserId);
               
               const now = new Date();
@@ -62,7 +77,7 @@ export function AdminClassTable({ classes, currentUserId, currentUserRole }: Adm
 
               if (end < now) {
                 statusLabel = "Concluída";
-                statusClass = "bg-zinc-100 text-zinc-500 hover:bg-zinc-200 border-zinc-200";
+                statusClass = "bg-green-100 text-green-700 hover:bg-green-200 border-green-200";
               } else if (start <= now && end >= now) {
                 statusLabel = "Em Andamento";
                 statusClass = "bg-green-100 text-green-700 hover:bg-green-200 border-green-200 animate-pulse";

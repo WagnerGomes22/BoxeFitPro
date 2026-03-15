@@ -2,14 +2,15 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
+import { errorResponse } from "@/lib/api-errors";
 
-export async function POST(req: Request) {
+export async function POST(_req: Request) {
   try {
     const session = await auth();
     const user = session?.user;
 
     if (!user || !user.email) {
-      return new NextResponse("Não autorizado", { status: 401 });
+      return errorResponse("Não autorizado", 401);
     }
 
     const dbUser = await prisma.user.findUnique({
@@ -21,7 +22,7 @@ export async function POST(req: Request) {
 
     if (!dbUser || !stripeCustomerId) {
       console.error("Erro Portal: Cliente não tem Stripe ID", dbUser?.email);
-      return new NextResponse(JSON.stringify({ error: "Cliente não possui ID do Stripe vinculado." }), { status: 404 });
+      return errorResponse("Cliente não possui ID do Stripe vinculado.", 404);
     }
 
     // Cria uma sessão do Portal do Cliente (para gerenciar cartões/assinaturas)
@@ -32,8 +33,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: portalSession.url });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("Erro ao criar sessão do portal:", error);
-    return new NextResponse(JSON.stringify({ error: error.message }), { status: 500 });
+    return errorResponse("Erro ao criar sessão do portal.", 500);
   }
 }

@@ -24,13 +24,28 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+type BookingStatus = "ATTENDED" | "CONFIRMED" | "NO_SHOW" | "CANCELED";
+
+interface BookingHistory {
+  id: string;
+  status: BookingStatus | string;
+  fullDate: string | Date;
+  formattedDate: string;
+  class: {
+    time: string;
+    name: string;
+    level: string;
+    instructor: string;
+  };
+}
+
 interface HistoryModalProps {
-  history: any[]; // The full history list
+  history: BookingHistory[];
 }
 
 export function HistoryModal({ history }: HistoryModalProps) {
   
-  const getStatusBadge = (booking: any) => {
+  const getStatusBadge = (booking: BookingHistory) => {
     switch (booking.status) {
       case "ATTENDED":
         return (
@@ -118,7 +133,7 @@ export function HistoryModal({ history }: HistoryModalProps) {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {history.map((booking: any) => (
+                        {history.map((booking) => (
                             <TableRow key={booking.id} className="border-b-neutral-100 dark:border-b-neutral-900 hover:bg-neutral-50/50 dark:hover:bg-neutral-900/50">
                                 <TableCell className="font-mono text-xs font-medium text-neutral-600 dark:text-neutral-400 py-2.5 text-center">
                                     {booking.formattedDate}

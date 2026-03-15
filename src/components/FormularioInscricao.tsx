@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { Calendar as CalendarIcon, CreditCard, CheckCircle2, Loader2, ArrowLeft, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Calendar as CalendarIcon, CreditCard, Loader2, ArrowLeft, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { z } from "zod";
@@ -22,7 +22,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -34,10 +33,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
 import { cn, validaCPF, formatCPF } from "@/lib/utils";
+import { toast } from "sonner";
 
-// --- Validações e Schemas ---
 
 const dataMinima18Anos = () => {
   const hoje = new Date();
@@ -68,16 +66,14 @@ const formSchema = z.object({
       message: "Você deve ter pelo menos 18 anos."
     }),
   
-  rua: z.string().optional(),
-  numero: z.string().optional(),
+  rua: z.string().min(1, { message: "A rua é obrigatória." }),
+  numero: z.string().min(1, { message: "O número é obrigatório." }),
   complemento: z.string().optional(),
-  bairro: z.string().optional(),
-  cidade: z.string().optional(),
-  estado: z.string().optional(),
+  bairro: z.string().min(1, { message: "O bairro é obrigatório." }),
+  cidade: z.string().min(1, { message: "A cidade é obrigatória." }),
   cep: z
     .string()
-    .optional()
-    .refine((value) => !value || /^\d{5}-?\d{3}$/.test(value), {
+    .refine((value) => /^\d{5}-?\d{3}$/.test(value), {
       message: "CEP inválido. O formato deve ser 00000-000 ou 00000000.",
     }),
   contatoEmergenciaNome: z.string().optional(),
@@ -111,11 +107,7 @@ const FormularioInscricao = () => {
     const planoSalvo = localStorage.getItem('planoSelecionado');
     if (planoSalvo) {
       setPlanoSelecionado(JSON.parse(planoSalvo));
-    } else {
-      // Se não tiver plano selecionado, redireciona para a página de planos
-      // Comentado para não quebrar testes manuais diretos em /inscricao, mas recomendado em prod
-      // router.push('/planos'); 
-    }
+    } 
   }, [router]);
 
 
@@ -134,12 +126,11 @@ const FormularioInscricao = () => {
       complemento: "",
       bairro: "",
       cidade: "",
-      estado: "",
       cep: "",
       contatoEmergenciaNome: "",
       contatoEmergenciaTelefone: "",
     },
-    mode: "onChange", // Valida enquanto digita/sai do campo para feedback rápido
+    mode: "onChange",
   });
 
   // Função para buscar CEP
@@ -161,8 +152,7 @@ const FormularioInscricao = () => {
       setValue("rua", data.logradouro);
       setValue("bairro", data.bairro);
       setValue("cidade", data.localidade);
-      setValue("estado", data.uf);
-    } catch (error) {
+    } catch {
       setError("cep", { type: "manual", message: "Erro ao buscar o CEP." });
     }
   };
@@ -180,13 +170,13 @@ const FormularioInscricao = () => {
   // Função para processar o pagamento (Passo 2)
   const handlePayment = async (metodo: "cartao" | "pix") => {
     if (metodo === "pix") {
-      alert("Pagamento via PIX será implementado em breve!");
+      toast.warning("Pagamento via PIX será implementado em breve!");
       return;
     }
 
     if (!planoSelecionado) {
-        alert("Nenhum plano selecionado. Por favor, volte e selecione um plano.");
-        return;
+      toast.error("Nenhum plano selecionado. Volte e selecione um plano.");
+      return;
     }
 
     setLoadingPayment(true);
@@ -219,11 +209,12 @@ const FormularioInscricao = () => {
         window.location.href = data.url;
       } else {
         console.error("Erro: URL de redirecionamento não encontrada", data);
-        alert("Erro ao iniciar pagamento. Verifique o console.");
+        toast.error("Erro ao iniciar pagamento. Tente novamente.");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Erro na requisição:", error);
-      alert(`Erro ao processar pagamento: ${error.message}`);
+      const message = error instanceof Error ? error.message : "Erro ao processar pagamento.";
+      toast.error(message);
     } finally {
       setLoadingPayment(false);
     }
@@ -420,8 +411,6 @@ const FormularioInscricao = () => {
                                 disabled={(date) =>
                                   date > new Date() || date < new Date("1900-01-01")
                                 }
-                                locale={ptBR}
-                              
                                 fromYear={new Date().getFullYear() - 100}
                                 toYear={new Date().getFullYear() - 18}
                               />
@@ -443,7 +432,7 @@ const FormularioInscricao = () => {
                       name="cep"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>CEP</FormLabel>
+                          <FormLabel>CEP *</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="00000-000"
@@ -460,7 +449,7 @@ const FormularioInscricao = () => {
                       name="rua"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Rua</FormLabel>
+                          <FormLabel>Rua *</FormLabel>
                           <FormControl>
                             <Input placeholder="Nome da sua rua" {...field} />
                           </FormControl>
@@ -473,7 +462,7 @@ const FormularioInscricao = () => {
                       name="numero"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Número</FormLabel>
+                          <FormLabel>Número *</FormLabel>
                           <FormControl>
                             <Input placeholder="Ex: 123" {...field} />
                           </FormControl>
@@ -486,7 +475,7 @@ const FormularioInscricao = () => {
                       name="bairro"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Bairro</FormLabel>
+                          <FormLabel>Bairro *</FormLabel>
                           <FormControl>
                             <Input placeholder="Seu bairro" {...field} />
                           </FormControl>
@@ -499,22 +488,9 @@ const FormularioInscricao = () => {
                       name="cidade"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Cidade</FormLabel>
+                          <FormLabel>Cidade *</FormLabel>
                           <FormControl>
                             <Input placeholder="Sua cidade" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="estado"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Estado</FormLabel>
-                          <FormControl>
-                            <Input placeholder="UF" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

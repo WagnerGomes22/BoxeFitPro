@@ -46,8 +46,9 @@ export async function cancelSubscription() {
     revalidatePath("/dashboard/perfil");
     return { success: true, message: "Assinatura cancelada. Seu acesso continua até o fim do período." };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Erro ao cancelar assinatura:", error);
-    return { success: false, message: "Erro ao cancelar assinatura. Tente novamente." };
+    const message = error instanceof Error ? error.message : "Erro ao cancelar assinatura. Tente novamente.";
+    return { success: false, message };
   }
 }

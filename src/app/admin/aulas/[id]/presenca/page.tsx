@@ -1,7 +1,7 @@
 import { AttendanceList } from "./_components/attendance-list";
 import { getClassBookings } from "@/actions/instructor/get-class-bookings";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Clock, MapPin, User, CheckCircle2, AlertTriangle, Users } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, User, CheckCircle2, AlertTriangle, Users } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";

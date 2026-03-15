@@ -18,9 +18,28 @@ export default function AgendarPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   
-  // Estado para dados reais
+  type CalendarDayStat = { date: string; count: number; hasSpecial: boolean };
+  type CalendarClass = { startTime: Date; name: string };
+  type DayClass = {
+    id: string;
+    startTime: Date;
+    bookingsCount: number;
+    capacity: number;
+    name: string;
+    instructorName: string;
+    userBooked: boolean;
+  };
+  type DaySlot = {
+    id: string;
+    time: string;
+    available: boolean;
+    name: string;
+    instructor: string;
+    isBooked: boolean;
+  };
+
   const [calendarClasses, setCalendarClasses] = useState<{ date: string; count: number; hasSpecial: boolean }[]>([]);
-  const [daySlots, setDaySlots] = useState<any[]>([]);
+  const [daySlots, setDaySlots] = useState<DaySlot[]>([]);
 
   // 1. Carregar dados do calendário (mês inicial)
   useEffect(() => {
@@ -33,10 +52,9 @@ export default function AgendarPage() {
     const end = endOfMonth(baseDate);
     
     try {
-      const classes = await getClassesByDateRange(start, end);
+      const classes = (await getClassesByDateRange(start, end)) as CalendarClass[];
       
-      // Agrupar por dia para o calendário
-      const statsByDay = classes.reduce((acc: any, cls) => {
+      const statsByDay = classes.reduce<Record<string, CalendarDayStat>>((acc, cls) => {
         const dayStr = format(cls.startTime, "yyyy-MM-dd");
         if (!acc[dayStr]) {
             acc[dayStr] = { date: dayStr, count: 0, hasSpecial: false };
@@ -58,9 +76,8 @@ export default function AgendarPage() {
     setIsLoadingSlots(true);
 
     try {
-      const classes = await getClassesForDay(newDate);
+      const classes = (await getClassesForDay(newDate)) as DayClass[];
       
-      // Transformar para o formato do TimeSlotPicker
       const slots = classes.map(c => ({
         id: c.id,
         time: format(c.startTime, "HH:mm"),
@@ -160,7 +177,7 @@ export default function AgendarPage() {
         <div className="xl:col-span-4 sticky top-6 space-y-6">
           <BookingSummary
             date={date}
-            timeSlot={selectedSlotData?.time}
+            timeSlot={selectedSlotData?.time ?? null}
             onConfirm={handleConfirm}
             isSubmitting={isSubmitting}
             isAlreadyBooked={!!selectedSlotData?.isBooked}

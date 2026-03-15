@@ -5,6 +5,7 @@ import { RecordCard } from "@/components/progress/RecordCard";
 import { Trophy, History } from "lucide-react";
 import { ContributionGrid } from "@/components/progress/ContributionGrid";
 import { HistoryModal } from "@/components/progress/HistoryModal";
+import Image from "next/image";
 
 export default async function ProgressPage() {
   const data = await getProgressData();
@@ -63,10 +64,12 @@ export default async function ProgressPage() {
       <div className="mt-8 relative overflow-hidden rounded-xl bg-black border border-neutral-800">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/90 to-transparent z-10" />
-          <img 
-            src="/images/tyson.jpg" 
-            alt="Mike Tyson" 
-            className="w-full h-full object-cover grayscale object-[center_35%]"
+          <Image
+            src="/images/tyson.jpg"
+            alt="Mike Tyson"
+            fill
+            sizes="100vw"
+            className="object-cover grayscale object-[center_35%]"
           />
         </div>
         

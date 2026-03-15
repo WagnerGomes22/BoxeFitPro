@@ -6,13 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, LogIn } from "lucide-react";
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from "sonner";
 // import { getUserRole } from '@/actions/user/get-role'; // REMOVIDO PARA EVITAR ERROS DE HIDRATAÇÃO/NETWORK
 
 export default function Login() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -68,7 +66,7 @@ export default function Login() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
           <h1 className="text-4xl font-black italic tracking-tighter mb-2">
-            BOXE<span className="text-red-600">_PASS</span>
+            BoxeFit<span className="text-red-600"> Pro</span>
           </h1>
           <p className="text-neutral-400 text-sm">Entre no ringue.</p>
         </div>

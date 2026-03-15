@@ -34,7 +34,7 @@ export function CancelableClassCard({ bookingId, ...props }: CancelableClassCard
       } else {
         toast.error(result.message);
       }
-    } catch (error) {
+    } catch {
       toast.error("Erro ao cancelar aula.");
     } finally {
       setIsCancelling(false);

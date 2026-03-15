@@ -5,6 +5,15 @@ import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 import { revalidatePath } from "next/cache";
 
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Erro desconhecido";
+}
+
+function isStripeResourceMissing(error: unknown) {
+  const code = (error as { code?: string }).code;
+  return code === "resource_missing";
+}
+
 export async function createCheckoutSession(priceId: string, planName: string) {
   const session = await auth();
   const user = session?.user;
@@ -40,9 +49,9 @@ export async function createCheckoutSession(priceId: string, planName: string) {
             let stripeSub;
             try {
                 stripeSub = await stripe.subscriptions.retrieve(activeSubscription.stripeSubscriptionId);
-            } catch (e: any) {
+            } catch (e: unknown) {
                 // Se der erro 404 (assinatura não existe mais no Stripe), consideramos cancelada
-                if (e.code === 'resource_missing') {
+                if (isStripeResourceMissing(e)) {
                     console.warn("Assinatura não encontrada no Stripe. Marcando como CANCELED no banco.");
                     await prisma.subscription.update({
                         where: { id: activeSubscription.id },
@@ -51,7 +60,7 @@ export async function createCheckoutSession(priceId: string, planName: string) {
                     // Força cair no fluxo de nova assinatura abaixo
                     throw new Error("Assinatura expirada ou removida no Stripe. Criando nova...");
                 }
-                throw e;
+            throw e;
             }
 
             if (stripeSub.status !== 'active' && stripeSub.status !== 'trialing') {
@@ -87,14 +96,15 @@ export async function createCheckoutSession(priceId: string, planName: string) {
             revalidatePath("/dashboard", "layout");
             return { success: true, message: "Plano alterado com sucesso!" };
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Erro ao fazer upgrade/downgrade:", error);
+            const errorMessage = getErrorMessage(error);
             // Se o erro for de assinatura inválida/cancelada, deixamos prosseguir para criar uma NOVA
-            if (error.message.includes("Assinatura expirada") || error.message.includes("Assinatura não está ativa") || error.message.includes("No such subscription")) {
+            if (errorMessage.includes("Assinatura expirada") || errorMessage.includes("Assinatura não está ativa") || errorMessage.includes("No such subscription")) {
                 console.log("Caindo para fluxo de nova assinatura...");
             } else {
                 // Se for outro erro (ex: cartão), retorna o erro
-                return { error: `Não foi possível alterar o plano: ${error.message}` };
+                return { error: `Não foi possível alterar o plano: ${errorMessage}` };
             }
         }
     }
@@ -142,8 +152,8 @@ export async function createCheckoutSession(priceId: string, planName: string) {
 
     return { url: checkoutSession.url };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Erro ao criar checkout:", error);
-    return { error: error.message };
+    return { error: getErrorMessage(error) };
   }
 }

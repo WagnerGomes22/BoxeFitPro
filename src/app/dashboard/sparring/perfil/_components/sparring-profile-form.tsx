@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, type ControllerRenderProps } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,8 @@ const formSchema = z.object({
   }),
 });
 
+type SparringFormValues = z.input<typeof formSchema>;
+
 interface SparringProfileFormProps {
   initialData?: {
     weight: number;
@@ -87,7 +89,7 @@ export function SparringProfileForm({ initialData }: SparringProfileFormProps) {
   const [weightValue, setWeightValue] = useState(initialData?.weight ? initialData.weight.toString() : "");
   const [heightValue, setHeightValue] = useState(initialData?.height ? initialData.height.toString() : "");
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<SparringFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       weight: initialData?.weight || undefined,
@@ -99,12 +101,11 @@ export function SparringProfileForm({ initialData }: SparringProfileFormProps) {
     },
   });
 
-  // Limpa o 0 inicial se o usuário começar a digitar
-  const handleFocus = (setter: any, value: any) => {
-     if (value === "0" || value === 0) setter("");
-  };
+  type InputSetter = (val: string) => void;
+  type HeightField = ControllerRenderProps<SparringFormValues, "height">;
+  type WeightField = ControllerRenderProps<SparringFormValues, "weight">;
 
-  const handleHeightInput = (value: string, setter: (val: string) => void, formField: any) => {
+  const handleHeightInput = (value: string, setter: InputSetter, formField: HeightField) => {
     // Apenas números
     let nums = value.replace(/\D/g, "");
     
@@ -123,8 +124,8 @@ export function SparringProfileForm({ initialData }: SparringProfileFormProps) {
 
   const handleWeightInput = (
     value: string, 
-    setter: (val: string) => void, 
-    formField: any
+    setter: InputSetter, 
+    formField: WeightField
   ) => {
     // Mantém a lógica "financeira" para o peso que funciona bem (ex: 855 -> 85.5)
     let clean = value.replace(/\D/g, "");
@@ -142,10 +143,11 @@ export function SparringProfileForm({ initialData }: SparringProfileFormProps) {
     formField.onChange(clean);
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.input<typeof formSchema>) {
     startTransition(async () => {
       try {
-        await upsertSparringProfile(values);
+        const parsedValues = formSchema.parse(values);
+        await upsertSparringProfile(parsedValues);
         toast.success("Perfil de sparring atualizado com sucesso!");
         router.push("/dashboard/sparring");
         router.refresh();
@@ -212,8 +214,15 @@ export function SparringProfileForm({ initialData }: SparringProfileFormProps) {
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder="Ex: 25" 
-                    {...field}
+                    placeholder="Ex: 25"
+                    name={field.name}
+                    ref={field.ref}
+                    onBlur={field.onBlur}
+                    value={
+                      typeof field.value === "number" || typeof field.value === "string"
+                        ? field.value
+                        : ""
+                    }
                     onChange={(e) => {
                       const value = e.target.value;
                       if (value.length <= 2) {
@@ -221,11 +230,10 @@ export function SparringProfileForm({ initialData }: SparringProfileFormProps) {
                       }
                     }}
                     onInput={(e) => {
-                        // Força bruta para limitar visualmente caso o navegador permita digitar rápido
                         const target = e.target as HTMLInputElement;
                         if (target.value.length > 2) {
                             target.value = target.value.slice(0, 2);
-                            field.onChange(target.value); // Atualiza o form state também
+                            field.onChange(target.value);
                         }
                     }}
                     className="no-spinner"

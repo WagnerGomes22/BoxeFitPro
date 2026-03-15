@@ -6,14 +6,23 @@ import {
   subDays, 
   format, 
   isSameDay, 
-  getDay,
-  startOfDay
+  getDay
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
+type BookingStatus = "ATTENDED" | "NO_SHOW" | "CONFIRMED" | "CANCELED";
+
+interface BookingData {
+  fullDate: string | Date;
+  status: BookingStatus;
+  class: {
+    name: string;
+  };
+}
+
 interface ContributionGridProps {
-  data: any[]; // Booking list
+  data: BookingData[];
 }
 
 export function ContributionGrid({ data }: ContributionGridProps) {
@@ -27,10 +36,8 @@ export function ContributionGrid({ data }: ContributionGridProps) {
     end: today,
   });
 
-  // Calculate padding for the start of the grid
-  // GitHub grid starts with Sunday at the top (row 0)
-  // If startDate is Wednesday (3), we need 3 empty cells before it to push it to the 4th row.
-  const startDayOfWeek = getDay(startDate); // 0 (Sun) - 6 (Sat)
+
+  const startDayOfWeek = getDay(startDate);
   const emptyDays = Array(startDayOfWeek).fill(null);
 
   // Combine empty cells and real days
@@ -44,7 +51,7 @@ export function ContributionGrid({ data }: ContributionGridProps) {
     
     if (bookingsForDay.length === 0) return null;
     
-    // Priority: ATTENDED > NO_SHOW > CANCELED
+
     return bookingsForDay.sort((a, b) => {
       const score = (status: string) => {
         if (status === "ATTENDED") return 3;
@@ -57,19 +64,18 @@ export function ContributionGrid({ data }: ContributionGridProps) {
     })[0];
   };
 
-  const getStatusColor = (booking: any) => {
+  const getStatusColor = (booking: BookingData | null) => {
     if (!booking) return "bg-neutral-100 dark:bg-neutral-900"; 
     
     switch (booking.status) {
       case "ATTENDED":
         return "bg-emerald-500 dark:bg-emerald-500"; 
       case "CONFIRMED":
-        // Se já passou a data, mas ainda é CONFIRMED, significa que o instrutor NÃO marcou presença nem falta.
-        // Portanto, NÃO é falta. É apenas "Aguardando Confirmação" ou neutro.
+       
         if (new Date(booking.fullDate) < new Date()) {
-             return "bg-neutral-300 dark:bg-neutral-700"; // Neutro escuro para diferenciar de futuro
+             return "bg-neutral-300 dark:bg-neutral-700"; 
         }
-        return "bg-neutral-300 dark:bg-neutral-700"; // Futuro (Agendado)
+        return "bg-neutral-300 dark:bg-neutral-700"; 
       case "NO_SHOW":
         return "bg-red-500 dark:bg-red-500"; 
       case "CANCELED":
@@ -79,7 +85,7 @@ export function ContributionGrid({ data }: ContributionGridProps) {
     }
   };
   
-  const getTooltipText = (date: Date, booking: any) => {
+  const getTooltipText = (date: Date, booking: BookingData | null) => {
     const dateStr = format(date, "dd MMM", { locale: ptBR });
     if (!booking) return `${dateStr} — Sem aula`;
     
@@ -136,11 +142,8 @@ export function ContributionGrid({ data }: ContributionGridProps) {
                 const colorClass = getStatusColor(booking);
                 const tooltipText = getTooltipText(day, booking);
                 
-                const isCanceled = booking?.status === "CANCELED";
-                const isNoShow = booking?.status === "NO_SHOW";
-                
                 // Override for special borders/styles not handled by colorClass alone if needed
-                let finalColorClass = colorClass;
+                const finalColorClass = colorClass;
                 
                 return (
                     <div 

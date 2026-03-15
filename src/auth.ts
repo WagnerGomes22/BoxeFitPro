@@ -1,15 +1,15 @@
-import NextAuth from "next-auth"
+import NextAuth, { type User as NextAuthUser } from "next-auth"
+import type { Adapter } from "next-auth/adapters"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import Credentials from "next-auth/providers/credentials"
 import { authConfig } from "./auth.config"
 import { z } from "zod"
-import { User } from "@prisma/client"
 import bcrypt from "bcryptjs"
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(prisma) as any,
+  adapter: PrismaAdapter(prisma) as Adapter,
   session: { strategy: "jwt" },
   providers: [
     Credentials({
@@ -24,7 +24,16 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           if (!user || !user.password) return null;
           
           const passwordsMatch = await bcrypt.compare(password, user.password);
-          if (passwordsMatch) return user as any;
+          if (passwordsMatch) {
+            const authUser: NextAuthUser = {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              image: user.image,
+              role: user.role,
+            };
+            return authUser;
+          }
         }
 
         return null;

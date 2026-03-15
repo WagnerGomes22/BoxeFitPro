@@ -3,7 +3,6 @@
 import { useState, useRef } from "react";
 import { Camera, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { updateProfileImage } from "@/actions/user/update-profile-image";
 
@@ -53,7 +52,7 @@ export function ImageUpload({ currentImage, name }: ImageUploadProps) {
       };
       reader.readAsDataURL(file);
 
-    } catch (error) {
+    } catch {
       toast.error("Erro ao processar imagem.");
       setIsUploading(false);
     }

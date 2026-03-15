@@ -57,7 +57,7 @@ const BemVindo = () => {
             </h2>
             <Image
               src="/logo-boxefit.svg"
-              alt="BoxFit Pro"
+              alt="BoxeFit Pro"
               width={50}
               height={50}
               className="w-25"

@@ -17,7 +17,7 @@ export type ClassWithDetails = {
   type?: "CLASS" | "SPARRING";
 };
 
-// Busca aulas de um intervalo de datas (para preencher o calendário)
+
 export async function getClassesByDateRange(startDate: Date, endDate: Date) {
   const session = await auth();
   const userId = session?.user?.id;
@@ -129,7 +129,7 @@ export async function getClassesForDay(date: Date) {
                 not: "CANCELED",
               },
             },
-            select: { id: true }, // Só precisamos saber se existe
+            select: { id: true }, 
           }
         : false,
     },
@@ -178,7 +178,7 @@ export async function getClassesForDay(date: Date) {
             capacity: 2,
             bookingsCount: 2,
             instructorName: s.instructor?.name || "Instrutor",
-            userBooked: true, // Sempre true para o aluno ver como agendado
+            userBooked: true,
             userBookingId: null,
             type: "SPARRING" as const,
           };

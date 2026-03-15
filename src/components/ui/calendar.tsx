@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   DayPicker,
   type MonthCaptionProps,
+  type DayPickerLocale,
   useDayPicker,
 } from "react-day-picker";
 import { format } from "date-fns";
@@ -41,7 +42,7 @@ function Calendar({
 
   return (
     <DayPicker
-      locale={ptBR}
+      locale={ptBR as unknown as Partial<DayPickerLocale>}
       showOutsideDays={showOutsideDays}
       hideNavigation={shouldHideNavigation}
       className={cn(
@@ -110,7 +111,7 @@ function Calendar({
 
 Calendar.displayName = "Calendar";
 
-const CustomMonthCaption = React.memo(function CustomMonthCaption({
+function CustomMonthCaption({
   calendarMonth,
 }: MonthCaptionProps) {
   const { goToMonth, dayPickerProps } = useDayPicker();
@@ -179,6 +180,6 @@ const CustomMonthCaption = React.memo(function CustomMonthCaption({
       </Select>
     </div>
   );
-});
+}
 
 export { Calendar };

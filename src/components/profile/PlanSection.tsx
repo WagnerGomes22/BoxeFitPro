@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import type { Subscription } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ import { syncSubscriptionStatus } from "@/actions/subscription/sync-subscription
 import { cancelSubscription } from "@/actions/subscription/cancel-subscription";
 
 interface PlanSectionProps {
-  subscription: any; // Tipar melhor se possível com Prisma types
+  subscription: Subscription | null;
 }
 
 export function PlanSection({ subscription }: PlanSectionProps) {
@@ -46,7 +47,7 @@ export function PlanSection({ subscription }: PlanSectionProps) {
       } else {
         toast.error(result.message);
       }
-    } catch (error) {
+    } catch {
       toast.error("Ocorreu um erro inesperado.");
     } finally {
       setIsCancelling(false);
@@ -63,7 +64,7 @@ export function PlanSection({ subscription }: PlanSectionProps) {
         } else {
             toast.warning(result.message);
         }
-    } catch (error) {
+    } catch {
         toast.error("Erro ao sincronizar status.");
     } finally {
         setIsSyncing(false);
@@ -182,7 +183,7 @@ export function PlanSection({ subscription }: PlanSectionProps) {
                   <div className="text-left md:text-right">
                     <p className="text-sm text-neutral-500 dark:text-neutral-400">Valor Mensal</p>
                     <p className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-                      R$ {subscription.planName?.includes("VIP") ? "79,90" : subscription.planName?.includes("Premium") ? "49,90" : "29,90"} <span className="text-sm font-normal text-neutral-500">/mês</span>
+                      R$ {subscription.planName?.includes("VIP") ? "179,90" : subscription.planName?.includes("Premium") ? "109,90" : "69,90"} <span className="text-sm font-normal text-neutral-500">/mês</span>
                     </p>
                   </div>
                 </div>

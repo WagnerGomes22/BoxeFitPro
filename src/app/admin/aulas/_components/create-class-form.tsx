@@ -43,7 +43,7 @@ export function CreateClassForm({ instructors }: { instructors: Instructor[] }) 
       } else {
         toast.error(result.message);
       }
-    } catch (error) {
+    } catch {
       toast.error("Erro inesperado ao criar aula.");
     } finally {
       setIsPending(false);

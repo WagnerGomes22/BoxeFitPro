@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import type { Session } from "next-auth";
 import Image from 'next/image';
 import { Check, Star, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -17,7 +18,7 @@ export interface Plano {
 }
 
 interface PlanosProps {
-  user?: any;
+  user?: Session["user"] | null;
   activePlanName?: string | null;
 }
 
@@ -68,7 +69,7 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
     <div className="flex flex-col items-center justify-center p-4">
         <Image
             src="/logo-boxefit.svg"
-            alt="BoxFit Pro"
+            alt="BoxeFit Pro"
             width={50}
             height={50}
             className="h-30 w-30"
@@ -81,16 +82,16 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
       <div className="relative mt-10 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
         {/* Plano Básico */}
         <div
-          className="relative bg-white h-96 w-80 rounded-xl shadow-lg p-6 border-2 border-[#F5F5F5] transition-transform duration-300"
+          className="relative bg-white h-96 w-80 rounded-xl shadow-lg p-6 border-2 border-[#F5F5F5] transition-transform duration-300 flex flex-col"
         >
           <h2 className="text-base font-bold text-center mb-2">
             Básico
           </h2>
           <p className="text-base font-light text-center mb-2">
-            R$ <span className="font-bold text-3xl">29,90</span>
+            R$ <span className="font-bold text-3xl">69,90</span>
             <span className="text-xl">/mês</span>
           </p>
-          <p className="text-sm text-center mb-4">Ideal para quem está começando.</p>
+          <p className="text-sm text-center mb-4">Entrada acessível para começar com consistência.</p>
           <ul className="text-sm mb-6 space-y-2">
             <li className="flex items-center">
               <Check className="h-4 w-4 mr-2 text-white" />
@@ -102,12 +103,12 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
             </li>
             <li className="flex items-center">
               <Check className="h-4 w-4 mr-2 text-green-500" />
-              <span>Armário individual</span>
+              <span>Aulas em grupo</span>
             </li>
           </ul>
           <Button
             type="button"
-            className={`block w-full mt-20 px-4 py-2 rounded-lg text-center ${
+            className={`block w-full mt-auto px-4 py-2 rounded-lg text-center ${
               isCurrentPlan('Básico') 
                 ? "bg-emerald-600 hover:bg-emerald-600 cursor-default text-white" 
                 : "bg-zinc-950 hover:bg-zinc-800 text-white"
@@ -118,9 +119,9 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
               handleSelecionarPlano({
                 id: 'basico',
                 nome: 'Básico',
-                preco: 29.90,
+                preco: 69.90,
                 periodo: 'mensal',
-                priceId: 'price_1SrLkRBb2zDLKzymqY8wmP9B'
+                priceId: 'price_1TADlNBb2zDLKzymk3tupTyW'
               });
             }}
             disabled={loadingId !== null || isCurrentPlan('Básico')}
@@ -132,7 +133,7 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
 
         {/* Plano Premium */}
         <div
-          className="relative bg-white h-96 w-80 rounded-xl shadow-lg p-6 border-2 border-red-600 transition-transform duration-300 z-10"
+          className="relative bg-white h-96 w-80 rounded-xl shadow-lg p-6 border-2 border-red-600 transition-transform duration-300 z-10 flex flex-col"
         >
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 transform bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center z-20">
             <Star className="h-4 w-4 mr-1 fill-white stroke-none" />
@@ -142,10 +143,10 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
             Premium
           </h2>
           <p className="text-base font-light text-center mb-2">
-            R$ <span className="font-bold text-3xl">49,90</span>
+            R$ <span className="font-bold text-3xl">109,90</span>
             <span className="text-xl">/mês</span>
           </p>
-          <p className="text-sm text-center mb-4">Acesso completo e mais flexibilidade.</p>
+          <p className="text-sm text-center mb-4">Plano completo para evoluir mais rápido.</p>
           <ul className="text-sm mb-6 space-y-2">
             <li className="flex items-center">
               <Check className="h-4 w-4 mr-2 text-green-500" />
@@ -166,7 +167,7 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
           </ul>
           <Button
             type="button"
-            className={`block w-full mt-14 px-4 py-2 rounded-lg text-center ${
+            className={`block w-full mt-auto px-4 py-2 rounded-lg text-center ${
               isCurrentPlan('Premium') 
                 ? "bg-emerald-600 hover:bg-emerald-600 cursor-default text-white" 
                 : "bg-zinc-950 hover:bg-zinc-800 text-white"
@@ -177,9 +178,9 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
               handleSelecionarPlano({
                 id: 'premium',
                 nome: 'Premium',
-                preco: 49.90,
+                preco: 109.90,
                 periodo: 'mensal',
-                priceId: 'price_1SrLkRBb2zDLKzymJmjiNjR8'
+                priceId: 'price_1TADk2Bb2zDLKzymvNweWZPm'
               });
             }}
             disabled={loadingId !== null || isCurrentPlan('Premium')}
@@ -191,16 +192,16 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
 
         {/* Plano VIP */}
         <div
-          className="relative text-white bg-[#3b3b40] h-96 w-80 rounded-xl shadow-lg p-6 border-2 border-[#FFD700] transition-transform duration-300"
+          className="relative text-white bg-[#3b3b40] h-96 w-80 rounded-xl shadow-lg p-6 border-2 border-[#FFD700] transition-transform duration-300 flex flex-col"
         >
           <h2 className="text-base text-[#FFD700] font-bold text-center mb-2">
             VIP
           </h2>
           <p className="text-base font-light text-center mb-2">
-            R$ <span className="font-bold text-3xl">79,90</span>
+            R$ <span className="font-bold text-3xl">179,90</span>
             <span className="text-xl">/mês</span>
           </p>
-          <p className="text-sm text-center mb-4">Treinamento personalizado</p>
+          <p className="text-sm text-center mb-4">Experiência exclusiva com treino personalizado.</p>
           <ul className="text-sm mb-6 space-y-2">
             <li className="flex items-center">
               <Check className="h-4 w-4 mr-2 text-green-500" />
@@ -225,7 +226,7 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
           </ul>
           <Button
             type="button"
-            className={`block w-full mt-8 px-4 py-2 rounded-lg text-center ${
+            className={`block w-full mt-auto px-4 py-2 rounded-lg text-center ${
               isCurrentPlan('VIP') 
                 ? "bg-emerald-600 hover:bg-emerald-600 cursor-default text-white" 
                 : "bg-zinc-950 hover:bg-zinc-800 text-white"
@@ -236,9 +237,9 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
               handleSelecionarPlano({
                 id: 'vip',
                 nome: 'VIP',
-                preco: 79.90,
+                preco: 179.90,
                 periodo: 'mensal',
-                priceId: 'price_1SrLkSBb2zDLKzymSYgpbKHD'
+                priceId: 'price_1TADkjBb2zDLKzymcJXh7Xng'
               });
             }}
             disabled={loadingId !== null || isCurrentPlan('VIP')}

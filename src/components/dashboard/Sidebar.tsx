@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Calendar, Activity, User, LogOut, Dumbbell, CalendarDays } from "lucide-react";
+import { Home, Calendar, Activity, User, LogOut, Dumbbell } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -31,7 +31,6 @@ export function Sidebar({ user }: SidebarProps) {
   const links = [
     { href: "/dashboard", label: "MINHAS AULAS", icon: Home },
     { href: "/dashboard/agendar", label: "AGENDAR TREINO", icon: Calendar },
-    { href: "/dashboard/grade", label: "GRADE DE HORÁRIOS", icon: CalendarDays },
     { href: "/dashboard/sparring", label: "SPARRING", icon: Dumbbell },
     { href: "/dashboard/progresso", label: "MEU PROGRESSO", icon: Activity },
     { href: "/dashboard/perfil", label: "PERFIL", icon: User },
@@ -42,10 +41,10 @@ export function Sidebar({ user }: SidebarProps) {
       {/* Brand Header */}
       <div className="p-8 pb-10">
         <h1 className="text-2xl font-black tracking-tighter text-white italic">
-          BOXE<span className="text-red-600">_PASS</span>
+          BoxeFit<span className="text-red-600"> Pro</span>
         </h1>
         <p className="text-[10px] text-neutral-500 font-mono tracking-widest uppercase mt-1">
-          Gym Management System
+          Bem vindo ao BoxeFit Pro
         </p>
       </div>
 

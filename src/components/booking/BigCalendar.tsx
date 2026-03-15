@@ -12,9 +12,7 @@ import {
   isSameDay, 
   addMonths, 
   subMonths, 
-  isToday,
-  isBefore,
-  startOfToday
+  isToday
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
@@ -105,7 +103,7 @@ export function BigCalendar({ selectedDate, onSelectDate, disabledDays, classesD
 
       {/* Grid de Dias */}
       <div className="grid grid-cols-7 auto-rows-fr flex-1 bg-white/[0.04] gap-[1px]">
-        {days.map((day, dayIdx) => {
+        {days.map((day) => {
           const isDisabled = disabledDays ? disabledDays(day) : false;
           const isSelected = selectedDate ? isSameDay(day, selectedDate) : false;
           const isCurrentMonth = isSameMonth(day, currentMonth);

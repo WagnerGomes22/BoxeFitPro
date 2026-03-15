@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
+import { errorResponse } from "@/lib/api-errors";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -19,9 +20,9 @@ export async function POST(req: Request) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET
     );
-  } catch (error: any) {
-    console.error(`Erro na assinatura do Webhook: ${error.message}`);
-    return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 });
+  } catch (error) {
+    console.error("Erro na assinatura do Webhook:", error);
+    return errorResponse("Webhook inválido.", 400);
   }
 
   const session = event.data.object as Stripe.Checkout.Session;
@@ -81,7 +82,7 @@ export async function POST(req: Request) {
 
       } catch (error) {
         console.error("Erro ao atualizar assinatura no banco:", error);
-        return new NextResponse("Erro ao atualizar banco de dados", { status: 500 });
+        return errorResponse("Erro ao atualizar banco de dados.", 500);
       }
     } else {
         // Fallback: Tentar buscar pelo stripeCheckoutSessionId se o metadata falhar

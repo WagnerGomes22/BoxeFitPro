@@ -41,12 +41,12 @@ export async function getAdminDashboardData() {
     // Receita Mensal Estimada (Baseada em Assinaturas Ativas)
     // Preços hardcoded baseados no componente Planos.tsx (idealmente estariam no banco)
     const PLAN_PRICES: Record<string, number> = {
-      "Básico": 29.90,
-      "Premium": 49.90,
-      "VIP": 79.90,
+      "Básico": 69.90,
+      "Premium": 109.90,
+      "VIP": 179.90,
       // Fallback para variações de string
-      "Basico": 29.90,
-      "Basic": 29.90,
+      "Basico": 69.90,
+      "Basic": 69.90,
     };
 
     const activeSubscriptions = await prisma.subscription.findMany({
@@ -195,7 +195,7 @@ export async function getAdminDashboardData() {
         id: c.id,
         time: format(c.startTime, "HH:mm"),
         name: c.name,
-        instructor: c.instructor.name,
+        instructor: c.instructor.name ?? "Instrutor",
         bookings: c._count.bookings,
         capacity: c.capacity,
         occupancy: Math.round((c._count.bookings / c.capacity) * 100),
@@ -203,8 +203,7 @@ export async function getAdminDashboardData() {
       };
     });
 
-    // Alertas
-    const alerts = [];
+    const alerts: { type: "warning" | "danger" | "info" | "success"; message: string }[] = [];
 
     // 1. Planos próximos do vencimento (próximos 7 dias)
     const expiringSubscriptions = await prisma.subscription.findMany({

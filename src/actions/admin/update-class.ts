@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
-export async function updateClass(classId: string, prevState: any, formData: FormData) {
+export async function updateClass(classId: string, prevState: unknown, formData: FormData) {
   const session = await auth();
 
   if (!session || (session.user.role !== "ADMIN" && session.user.role !== "INSTRUCTOR")) {

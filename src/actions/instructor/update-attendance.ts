@@ -2,7 +2,7 @@
 
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { BookingStatus } from '@prisma/client';
+import { BookingStatus, Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 export async function updateAttendance(
@@ -16,6 +16,7 @@ export async function updateAttendance(
       return { error: 'Usuário não autenticado.' };
     }
 
+    const userId = session.user.id;
     const userRole = session.user.role;
     if (userRole !== 'ADMIN' && userRole !== 'INSTRUCTOR') {
       return { error: 'Permissão negada.' };
@@ -35,7 +36,7 @@ export async function updateAttendance(
 
     // Validação de Propriedade da Aula
     if (userRole !== 'ADMIN') {
-      if (booking.class.instructorId !== session.user.id) {
+      if (booking.class.instructorId !== userId) {
         return { error: 'Você só pode gerenciar a presença das suas próprias aulas.' };
       }
     }
@@ -50,14 +51,14 @@ export async function updateAttendance(
     }
 
     // Preparar dados de atualização
-    const updateData: any = {
+    const updateData: Prisma.BookingUpdateInput = {
       status,
     };
 
     // Se estiver marcando presença ou falta (finalizando), preenche auditoria
     if (status === BookingStatus.ATTENDED || status === BookingStatus.NO_SHOW) {
       updateData.attendedAt = new Date();
-      updateData.attendanceMarkedById = session.user.id;
+      updateData.attendanceMarkedById = userId;
     } else {
       // Se estiver resetando para CONFIRMED, limpa auditoria
       updateData.attendedAt = null;

@@ -44,7 +44,7 @@ export function MobileNav({ user }: MobileNavProps) {
     <div className="md:hidden flex items-center justify-between p-4 border-b bg-white dark:bg-neutral-950 dark:border-neutral-800">
       <div className="flex items-center gap-2">
         <h1 className="text-xl font-black tracking-tighter text-zinc-900 dark:text-white italic">
-          BOXE<span className="text-red-600">_PASS</span>
+          BoxeFit<span className="text-red-600"> Pro</span>
         </h1>
       </div>
 
@@ -60,11 +60,8 @@ export function MobileNav({ user }: MobileNavProps) {
             {/* Brand Header */}
             <div className="p-8 pb-6">
               <h2 className="text-2xl font-black tracking-tighter text-white italic">
-                BOXE<span className="text-red-600">_PASS</span>
+                BoxeFit<span className="text-red-600"> Pro</span>
               </h2>
-              <p className="text-[10px] text-neutral-500 font-mono tracking-widest uppercase mt-1">
-                Gym Management System
-              </p>
             </div>
 
             <div className="px-4 pb-6 flex-1 flex flex-col gap-6">

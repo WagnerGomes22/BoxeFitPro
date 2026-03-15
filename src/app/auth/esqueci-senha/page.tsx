@@ -62,7 +62,7 @@ export default function EsqueciSenhaPage() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
           <h1 className="text-4xl font-black italic tracking-tighter mb-2">
-            BOXE<span className="text-red-600">_PASS</span>
+            BoxeFit<span className="text-red-600"> Pro</span>
           </h1>
           <p className="text-neutral-400 text-sm">Recupere seu acesso ao ringue.</p>
         </div>

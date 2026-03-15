@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { errorResponse } from "@/lib/api-errors";
 
-// Validação para garantir que a chave secreta do Stripe está definida
+
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("A variável de ambiente STRIPE_SECRET_KEY não está definida.");
 }
 
-// Inicializa o Stripe com a chave secreta
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 });
@@ -18,49 +18,62 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { email, nome, priceId, dadosCompletos } = body;
 
-    // Validações de entrada
     if (!email || !nome || !priceId) {
-      return NextResponse.json(
-        { error: "Campos obrigatórios (email, nome, priceId) não foram fornecidos." },
-        { status: 400 }
+      return errorResponse(
+        "Campos obrigatórios (email, nome, priceId) não foram fornecidos.",
+        400
       );
+    }
+
+    const camposEndereco = ["rua", "numero", "bairro", "cidade", "cep"] as const;
+    const enderecoIncompleto = camposEndereco.some((campo) => {
+      const valor = dadosCompletos?.[campo];
+      return !valor || String(valor).trim() === "";
+    });
+
+    if (enderecoIncompleto) {
+      return errorResponse("Preencha todos os campos de endereço.", 400);
+    }
+
+    if (!/^\d{5}-?\d{3}$/.test(String(dadosCompletos?.cep))) {
+      return errorResponse("CEP inválido.", 400);
+    }
+
+    const cpfOriginal = dadosCompletos?.cpf ?? null;
+    const cpfLimpo = cpfOriginal ? cpfOriginal.replace(/\D/g, "") : null;
+
+    const existingByEmail = await prisma.user.findUnique({
+      where: {
+        email,
+      }
+    });
+
+    if (existingByEmail) {
+      return errorResponse("Email já cadastrado.", 400);
     }
 
     // Verificar se já existe usuário com este CPF
     let user = null;
-    if (dadosCompletos.cpf) {
-      user = await prisma.user.findUnique({
+    const cpfCriterios = [cpfLimpo, cpfOriginal].filter(Boolean).map((cpf) => ({ cpf }));
+
+    if (cpfCriterios.length > 0) {
+      user = await prisma.user.findFirst({
         where: {
-          cpf: dadosCompletos.cpf,
+          OR: cpfCriterios,
         }
       });
 
-      // Se usuário existe, verifica se tem assinatura ativa
-      /*
-      if (user) {
-        const activeSubscription = await prisma.subscription.findFirst({
-            where: {
-                userId: user.id,
-                status: "ACTIVE"
-            }
-        });
-
-        if (activeSubscription) {
-            return NextResponse.json(
-                { error: "Já existe uma assinatura ativa para este CPF." },
-                { status: 400 }
-              );
-        }
+      if (user && user.email !== email) {
+        return errorResponse("CPF já cadastrado.", 400);
       }
-      */
     }
 
-    // Se o usuário não existe, criar
+    
     if (!user) {
-        // Formatar data de nascimento
+      
         const birthDate = new Date(dadosCompletos.dataNascimento);
         
-        // Hash da senha se fornecida
+      
         let hashedPassword = null;
         if (dadosCompletos.senha) {
             hashedPassword = await bcrypt.hash(dadosCompletos.senha, 10);
@@ -70,11 +83,11 @@ export async function POST(req: Request) {
             data: {
                 name: dadosCompletos.nomeCompleto,
                 email: email,
-                password: hashedPassword, // Salva a senha hasheada
-                cpf: dadosCompletos.cpf,
+                password: hashedPassword,
+                cpf: cpfLimpo,
                 phone: dadosCompletos.telefone,
                 birthDate: birthDate,
-                // Criar endereço inicial
+            
                 addresses: {
                     create: {
                         street: dadosCompletos.rua,
@@ -82,12 +95,11 @@ export async function POST(req: Request) {
                         complement: dadosCompletos.complemento,
                         district: dadosCompletos.bairro,
                         city: dadosCompletos.cidade,
-                        state: dadosCompletos.estado,
                         cep: dadosCompletos.cep,
                         active: true
                     }
                 },
-                // Criar contato de emergência se fornecido
+         
                 emergencyContacts: dadosCompletos.contatoEmergenciaNome ? {
                     create: {
                         name: dadosCompletos.contatoEmergenciaNome,
@@ -126,14 +138,13 @@ export async function POST(req: Request) {
       metadata: {
         subscriptionId: subscription.id,
         userId: user.id,
-        // Removendo dadosUsuario para evitar estouro do limite de 500 chars do metadata
-        // dadosUsuario: JSON.stringify(dadosCompletos),
+       
       },
       success_url: successUrl,
       cancel_url: cancelUrl,
     });
 
-    // 2. Atualizar a assinatura com o ID da sessão do Stripe
+   
     if (session.id) {
       await prisma.subscription.update({
         where: { id: subscription.id },
@@ -143,19 +154,16 @@ export async function POST(req: Request) {
 
     // Retorna a URL da sessão para redirecionamento no frontend
     if (!session.url) {
-        return NextResponse.json(
-            { error: "Não foi possível criar a sessão de checkout. URL não encontrada." },
-            { status: 500 }
+        return errorResponse(
+            "Não foi possível criar a sessão de checkout.",
+            500
         );
     }
 
     return NextResponse.json({ url: session.url });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("Erro ao criar sessão de checkout no Stripe:", error);
-    return NextResponse.json(
-      { error: `Erro interno do servidor: ${error.message}` },
-      { status: 500 }
-    );
+    return errorResponse("Erro interno do servidor.", 500);
   }
 }

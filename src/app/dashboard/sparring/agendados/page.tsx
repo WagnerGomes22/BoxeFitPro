@@ -23,7 +23,7 @@ export default async function ScheduledSparringsPage() {
           <div className="col-span-full text-center py-12 border border-dashed rounded-lg">
             <Calendar className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
             <h3 className="text-lg font-medium">Nenhum sparring agendado</h3>
-            <p className="text-muted-foreground">Utilize a aba "Encontrar Parceiro" para marcar um treino.</p>
+            <p className="text-muted-foreground">Utilize a aba &quot;Encontrar Parceiro&quot; para marcar um treino.</p>
           </div>
         ) : (
           scheduled.map((match) => {

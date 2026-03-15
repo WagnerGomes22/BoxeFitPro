@@ -104,8 +104,9 @@ export async function syncSubscriptionStatus() {
       revalidatePath("/dashboard", "layout");
       return { success: true, message: "Assinatura sincronizada e ativada com sucesso!" };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Erro ao sincronizar assinatura:", error);
-    return { success: false, message: "Erro ao verificar status da assinatura." };
+    const message = error instanceof Error ? error.message : "Erro ao verificar status da assinatura.";
+    return { success: false, message };
   }
 }
