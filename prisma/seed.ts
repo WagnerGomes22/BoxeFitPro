@@ -20,8 +20,8 @@ async function main() {
   const hashedPassword = await bcrypt.hash(seedPassword, 10);
 
   await upsertUser({
-    name: "Admin BoxePass",
-    email: "admin@boxepass.com",
+    name: "Admin BoxeFit",
+    email: "admin@boxefit.com",
     password: hashedPassword,
     cpf: "000.111.222-33",
     phone: "(11) 90000-0000",
@@ -41,7 +41,7 @@ async function main() {
 
   await upsertUser({
     name: "João Boxeador",
-    email: "aluno@boxepass.com",
+    email: "aluno@boxefit.com",
     password: hashedPassword,
     cpf: "111.222.333-44",
     phone: "(11) 98888-7777",
@@ -51,7 +51,7 @@ async function main() {
 
   await upsertUser({
     name: "Maria Sparring",
-    email: "maria@boxepass.com",
+    email: "maria@boxefit.com",
     password: hashedPassword,
     cpf: "222.333.444-55",
     phone: "(11) 97777-6666",

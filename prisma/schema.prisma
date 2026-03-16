@@ -109,6 +109,7 @@ model Address {
   complement String?
   district   String
   city       String
+  state      String // UF
   active     Boolean @default(true) // Define qual é o endereço atual
 
   createdAt DateTime @default(now())

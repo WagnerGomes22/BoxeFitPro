@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const camposEndereco = ["rua", "numero", "bairro", "cidade", "cep"] as const;
+    const camposEndereco = ["rua", "numero", "bairro", "cidade", "estado", "cep"] as const;
     const enderecoIncompleto = camposEndereco.some((campo) => {
       const valor = dadosCompletos?.[campo];
       return !valor || String(valor).trim() === "";
@@ -92,6 +92,7 @@ export async function POST(req: Request) {
                 cpf: cpfLimpo,
                 phone: dadosCompletos.telefone,
                 birthDate: birthDate,
+                role: "USER", // Garante que o usuário criado é USER
             
                 addresses: {
                     create: {
@@ -100,6 +101,7 @@ export async function POST(req: Request) {
                         complement: dadosCompletos.complemento,
                         district: dadosCompletos.bairro,
                         city: dadosCompletos.cidade,
+                        state: dadosCompletos.estado,
                         cep: dadosCompletos.cep,
                         active: true
                     }
