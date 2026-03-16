@@ -5,15 +5,16 @@ import bcrypt from "bcryptjs";
 import { errorResponse } from "@/lib/api-errors";
 
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("A variável de ambiente STRIPE_SECRET_KEY não está definida.");
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock_key', {
 
 });
 
 export async function POST(req: Request) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.error("STRIPE_SECRET_KEY não definida");
+    return errorResponse("Erro de configuração do servidor (Stripe).", 500);
+  }
+
   try {
     const body = await req.json();
     const { email, nome, priceId, dadosCompletos } = body;

@@ -72,6 +72,8 @@ export function PlanSection({ subscription }: PlanSectionProps) {
   };
 
   const calculateRenewalDate = () => {
+    if (!subscription) return "N/A";
+
     if (subscription.currentPeriodEnd) {
       return format(new Date(subscription.currentPeriodEnd), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
     }

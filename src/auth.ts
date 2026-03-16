@@ -6,6 +6,7 @@ import Credentials from "next-auth/providers/credentials"
 import { authConfig } from "./auth.config"
 import { z } from "zod"
 import bcrypt from "bcryptjs"
+import { Role } from "@prisma/client"
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
   ...authConfig,
@@ -53,7 +54,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     async session({ session, token }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
-        session.user.role = token.role;
+        session.user.role = token.role as Role;
         // Não repassamos imagem via sessão para manter o cookie leve
       }
       return session;

@@ -35,7 +35,7 @@ interface BookingHistory {
     time: string;
     name: string;
     level: string;
-    instructor: string;
+    instructor: string | null;
   };
 }
 
