@@ -50,8 +50,7 @@ export async function updateAttendance(
       return { error: 'Período de chamada encerrado (aula finalizada há mais de 24h).' };
     }
 
-    // Preparar dados de atualização
-    const updateData: Prisma.BookingUpdateInput = {
+    const updateData: any = {
       status,
     };
 
