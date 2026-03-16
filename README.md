@@ -1,4 +1,4 @@
-# Boxe Pass
+# BoxeFit Pro
 
 Plataforma de gestão de treinos e assinaturas para academia de boxe, com área de aluno, instrutor e admin.
 
