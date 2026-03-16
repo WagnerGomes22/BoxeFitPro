@@ -5,15 +5,19 @@ import bcrypt from "bcryptjs";
 import { errorResponse } from "@/lib/api-errors";
 
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock_key', {
-
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2024-12-18.acacia',
+  typescript: true,
 });
 
 export async function POST(req: Request) {
-  if (!process.env.STRIPE_SECRET_KEY) {
-    console.error("STRIPE_SECRET_KEY não definida");
-    return errorResponse("Erro de configuração do servidor (Stripe).", 500);
-  }
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error("STRIPE_SECRET_KEY não definida no ambiente.");
+      return NextResponse.json(
+        { error: "Erro crítico: Chave do Stripe não encontrada no servidor." },
+        { status: 500 }
+      );
+    }
 
   try {
     const body = await req.json();
