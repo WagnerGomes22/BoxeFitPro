@@ -92,7 +92,7 @@ export async function POST(req: Request) {
                 cpf: cpfLimpo,
                 phone: dadosCompletos.telefone,
                 birthDate: birthDate,
-                role: "USER", // Garante que o usuário criado é USER
+              
             
                 addresses: {
                     create: {
