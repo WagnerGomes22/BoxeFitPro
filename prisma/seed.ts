@@ -1,5 +1,5 @@
 import { PrismaClient, Role } from "@prisma/client";
-import { addDays, setHours, setMinutes, startOfToday } from "date-fns";
+import { addDays, setHours, setMinutes, startOfToday, isSameMonth } from "date-fns";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -76,24 +76,32 @@ async function main() {
     { name: "Sparring (Boxe)", duration: 90, description: "Treino prático de combate (com proteção)." },
   ];
 
-  for (let i = 0; i < 30; i++) {
-    const currentDate = addDays(today, i);
+  let currentDate = today;
+
+  while (isSameMonth(currentDate, today)) {
     const dayOfWeek = currentDate.getDay();
 
-    if (dayOfWeek === 0) continue;
+    if (dayOfWeek === 0) {
+      currentDate = addDays(currentDate, 1);
+      continue;
+    }
 
     if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-      classesToCreate.push(createClassData(currentDate, 7, 0, classTypes[2], instructor.id));
-      classesToCreate.push(createClassData(currentDate, 8, 0, classTypes[0], instructor.id));
+      // Manhã
+      classesToCreate.push(createClassData(currentDate, 7, 0, classTypes[2], instructor.id)); // Boxe Funcional
+      classesToCreate.push(createClassData(currentDate, 8, 0, classTypes[2], instructor.id)); // Boxe Funcional
       
-      classesToCreate.push(createClassData(currentDate, 18, 0, classTypes[0], instructor.id));
-      classesToCreate.push(createClassData(currentDate, 19, 0, classTypes[1], instructor.id));
-      classesToCreate.push(createClassData(currentDate, 20, 0, classTypes[3], instructor.id));
+      // Noite
+      classesToCreate.push(createClassData(currentDate, 18, 0, classTypes[0], instructor.id)); // Boxe Iniciante
+      classesToCreate.push(createClassData(currentDate, 19, 0, classTypes[1], instructor.id)); // Boxe Técnico
+      classesToCreate.push(createClassData(currentDate, 20, 0, classTypes[3], instructor.id)); // Sparring
     } 
     else if (dayOfWeek === 6) {
-      classesToCreate.push(createClassData(currentDate, 9, 0, classTypes[2], instructor.id));
-      classesToCreate.push(createClassData(currentDate, 10, 30, classTypes[3], instructor.id));
+      classesToCreate.push(createClassData(currentDate, 9, 0, classTypes[1], instructor.id)); // Boxe Técnico
+      classesToCreate.push(createClassData(currentDate, 10, 30, classTypes[3], instructor.id)); // Sparring
     }
+
+    currentDate = addDays(currentDate, 1);
   }
 
   for (const classData of classesToCreate) {
