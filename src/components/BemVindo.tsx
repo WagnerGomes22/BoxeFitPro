@@ -43,9 +43,8 @@ const BemVindo = () => {
       </div>
 
       <div className="flex w-full flex-col justify-center bg-white p-8 md:w-1/2 md:p-12 lg:p-24 relative">
-        {/* Botão de Login no Topo */}
         <div className="absolute top-6 right-6 md:top-8 md:right-8">
-          <Button asChild variant="ghost" className="font-semibold text-zinc-600 hover:text-red-600 hover:bg-red-50">
+          <Button asChild variant="outline" className="font-semibold text-zinc-600 border-zinc-200 hover:border-red-600 hover:text-red-600 hover:bg-red-50">
             <Link href="/login">Entrar</Link>
           </Button>
         </div>
@@ -60,7 +59,7 @@ const BemVindo = () => {
               alt="BoxeFit Pro"
               width={50}
               height={50}
-              className="w-25"
+              className="w-20 h-20"
               priority
             />
           </div>

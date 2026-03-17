@@ -36,6 +36,7 @@ export default function AgendarPage() {
     name: string;
     instructor: string;
     isBooked: boolean;
+    isPast?: boolean;
   };
 
   const [calendarClasses, setCalendarClasses] = useState<{ date: string; count: number; hasSpecial: boolean }[]>([]);
@@ -78,14 +79,18 @@ export default function AgendarPage() {
     try {
       const classes = (await getClassesForDay(newDate)) as DayClass[];
       
-      const slots = classes.map(c => ({
-        id: c.id,
-        time: format(c.startTime, "HH:mm"),
-        available: c.bookingsCount < c.capacity,
-        name: c.name,
-        instructor: c.instructorName,
-        isBooked: c.userBooked
-      }));
+      const slots = classes.map(c => {
+        const isPast = isBefore(c.startTime, new Date());
+        return {
+          id: c.id,
+          time: format(c.startTime, "HH:mm"),
+          available: c.bookingsCount < c.capacity && !isPast,
+          name: c.name,
+          instructor: c.instructorName,
+          isBooked: c.userBooked,
+          isPast: isPast
+        };
+      });
       
       setDaySlots(slots);
     } catch (error) {

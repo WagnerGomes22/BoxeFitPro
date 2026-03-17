@@ -10,6 +10,7 @@ interface TimeSlot {
   instructor: string;
   isBooked?: boolean;
   bookingId?: string | null;
+  isPast?: boolean;
 }
 
 interface TimeSlotPickerProps {
@@ -54,7 +55,8 @@ export function TimeSlotPicker({
         {slots.map((slot) => {
             const isSelected = selectedSlot === slot.id;
             const isBooked = slot.isBooked;
-            const isDisabled = !slot.available && !isBooked;
+            const isPast = slot.isPast;
+            const isDisabled = (!slot.available && !isBooked) || isPast;
 
             return (
               <Button
@@ -68,10 +70,10 @@ export function TimeSlotPicker({
                   !isSelected && !isBooked && !isDisabled && "bg-white hover:bg-neutral-50 hover:border-red-600/30 border-neutral-200",
                   // Selecionado
                   isSelected && "bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700 shadow-md",
-                  // Desabilitado (Sem Vaga)
-                  isDisabled && "bg-neutral-100 text-neutral-400 border-neutral-100 opacity-70",
+                  // Desabilitado (Sem Vaga ou Passado)
+                  isDisabled && "bg-neutral-100 text-neutral-400 border-neutral-100 opacity-70 cursor-not-allowed",
                   // Já Inscrito
-                  isBooked && !isSelected && "bg-neutral-50 border-neutral-200 opacity-100"
+                  isBooked && !isSelected && !isPast && "bg-neutral-50 border-neutral-200 opacity-100"
                 )}
               >
                 {/* Indicador de "Já Inscrito" */}
@@ -81,13 +83,18 @@ export function TimeSlotPicker({
 
                 <div className="flex items-center justify-between w-full mb-1">
                     <span className={cn("text-2xl font-mono font-bold tracking-tighter leading-none", 
-                        isSelected ? "text-white" : "text-neutral-900"
+                        isSelected ? "text-white" : "text-neutral-900",
+                        isDisabled ? "text-neutral-400" : ""
                     )}>
                         {slot.time}
                     </span>
                     
                     <div className="flex flex-col items-end">
-                        {isBooked ? (
+                        {isPast ? (
+                            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm bg-neutral-200 text-neutral-500">
+                                Encerrado
+                            </span>
+                        ) : isBooked ? (
                             <span className={cn("text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm",
                                 isSelected ? "bg-white/20 text-white" : "bg-blue-100 text-blue-700"
                             )}>

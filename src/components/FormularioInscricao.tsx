@@ -71,6 +71,7 @@ const formSchema = z.object({
   complemento: z.string().optional(),
   bairro: z.string().min(1, { message: "O bairro é obrigatório." }),
   cidade: z.string().min(1, { message: "A cidade é obrigatória." }),
+  estado: z.string().min(2, { message: "O estado é obrigatório." }),
   cep: z
     .string()
     .refine((value) => /^\d{5}-?\d{3}$/.test(value), {
@@ -126,6 +127,7 @@ const FormularioInscricao = () => {
       complemento: "",
       bairro: "",
       cidade: "",
+      estado: "",
       cep: "",
       contatoEmergenciaNome: "",
       contatoEmergenciaTelefone: "",
@@ -152,6 +154,7 @@ const FormularioInscricao = () => {
       setValue("rua", data.logradouro);
       setValue("bairro", data.bairro);
       setValue("cidade", data.localidade);
+      setValue("estado", data.uf);
     } catch {
       setError("cep", { type: "manual", message: "Erro ao buscar o CEP." });
     }
@@ -491,6 +494,19 @@ const FormularioInscricao = () => {
                           <FormLabel>Cidade *</FormLabel>
                           <FormControl>
                             <Input placeholder="Sua cidade" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="estado"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Estado *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="UF" {...field} maxLength={2} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

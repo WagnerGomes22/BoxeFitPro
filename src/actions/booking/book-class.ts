@@ -51,6 +51,11 @@ export async function bookClass(classId: string): Promise<BookingResult> {
       return { success: false, message: "Aula não encontrada." };
     }
 
+    // 1.5 Verificar se a aula já passou
+    if (classData.startTime < new Date()) {
+      return { success: false, message: "Não é possível agendar aulas que já começaram ou já passaram." };
+    }
+
     const isSparringClass = classData.name.toLowerCase().includes("sparring");
 
     if (isSparringClass) {

@@ -31,7 +31,6 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
   };
 
   const handleSelecionarPlano = async (plano: Plano) => {
-    // Se usuário estiver logado, inicia fluxo de checkout direto (upgrade/downgrade/novo)
     if (user) {
       try {
         setLoadingId(plano.id);
@@ -39,7 +38,7 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
         
         if (result.success) {
             toast.success(result.message);
-            // Dá tempo do toast aparecer antes de redirecionar
+
             setTimeout(() => {
                 router.push('/dashboard/perfil');
             }, 1500);
@@ -55,7 +54,7 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
         toast.error("Ocorreu um erro ao processar sua solicitação.");
         console.error(error);
       } finally {
-        setLoadingId(null);
+        setLoadingId(null);s
       }
       return;
     }
@@ -66,15 +65,7 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-4">
-        <Image
-            src="/logo-boxefit.svg"
-            alt="BoxeFit Pro"
-            width={50}
-            height={50}
-            className="h-30 w-30"
-            priority
-            />
+    <div className="flex flex-col items-center justify-center pt-10">
       <h1 className="text-4xl font-bold mb-4">Nossos Planos de Assinatura:</h1>
       <p className="text-center text-gray-600 mb-8">
         Selecione o plano que melhor se adapta aos seus objetivos

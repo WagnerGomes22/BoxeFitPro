@@ -127,24 +127,20 @@ export async function getDashboardData() {
     // Em produção com muitos dados, isso deve ser otimizado com agregações do banco
   });
 
-  // 4. Calcular Estatísticas
-  // A. Taxa de Presença (Attendance Rate)
-  // Consideramos: ATTENDED e CONFIRMED (passado) como presença. NO_SHOW como falta.
+  
   const totalPastScheduled = pastBookingsRaw.filter(b => b.status !== "CANCELED").length;
-  const attendedCount = pastBookingsRaw.filter(b => 
-    b.status === "ATTENDED" || (b.status === "CONFIRMED" && b.class.startTime < now)
-  ).length;
+  
+  const attendedCount = pastBookingsRaw.filter(b => b.status === "ATTENDED").length;
 
   const attendanceRate = totalPastScheduled > 0 
     ? Math.round((attendedCount / totalPastScheduled) * 100) 
-    : 100; // Começa com 100%
+    : 100; 
 
-  // B. Sequência Atual (Streak)
-  // Conta dias consecutivos com aulas assistidas, de hoje para trás
+  
   let streak = 0;
   if (attendedCount > 0) {
     const attendedDates = pastBookingsRaw
-      .filter(b => b.status === "ATTENDED" || (b.status === "CONFIRMED" && b.class.startTime < now))
+      .filter(b => b.status === "ATTENDED")
       .map(b => format(b.class.startTime, "yyyy-MM-dd"));
     
     const uniqueDates = Array.from(new Set(attendedDates)).sort().reverse();
@@ -161,13 +157,15 @@ export async function getDashboardData() {
         // Se a última aula foi hoje ou ontem, a sequência está ativa
         if (lastClassDate === todayStr || lastClassDate === yesterdayStr) {
             streak = 1;
-            let currentDate = new Date(lastClassDate);
-            // Ajustar fuso horário para garantir comparação correta de dias (zerar horas)
+            // Parse manual para evitar problemas de fuso horário onde o Date() pode voltar um dia
+            const [year, month, day] = lastClassDate.split('-').map(Number);
+            let currentDate = new Date(year, month - 1, day);
             currentDate.setHours(0, 0, 0, 0);
             
             for (let i = 1; i < uniqueDates.length; i++) {
                 const prevDateStr = uniqueDates[i];
-                const prevDate = new Date(prevDateStr);
+                const [pYear, pMonth, pDay] = prevDateStr.split('-').map(Number);
+                const prevDate = new Date(pYear, pMonth - 1, pDay);
                 prevDate.setHours(0, 0, 0, 0); // Zerar horas para comparação de dias inteiros
 
                 // Diferença em dias
@@ -185,10 +183,10 @@ export async function getDashboardData() {
     }
   }
 
-  // 5. Transformar dados para o formato da UI
+
   const upcomingClassesMapped = upcomingBookingsRaw.map((booking) => ({
     id: booking.id,
-    dateObj: booking.class.startTime, // Auxiliar para ordenação
+    dateObj: booking.class.startTime, 
     formattedDate: format(booking.class.startTime, "dd MMM", { locale: ptBR }).toUpperCase(),
     class: {
       name: booking.class.name,
@@ -224,8 +222,8 @@ export async function getDashboardData() {
   // Mesclar e ordenar por data
   const upcomingClasses = [...upcomingClassesMapped, ...upcomingSparringsMapped]
     .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime())
-    .slice(0, 5) // Pegar apenas os 5 primeiros combinados
-    .map(({ dateObj, ...rest }) => rest); // Remover o auxiliar dateObj
+    .slice(0, 5) 
+    .map(({ dateObj, ...rest }) => rest); 
 
   const pastClasses = pastBookingsRaw.slice(0, 5).map((booking) => ({ // Apenas as 5 últimas para a lista
     id: booking.id,
