@@ -5,6 +5,25 @@ import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { errorResponse } from "@/lib/api-errors";
 
+function mapStripeStatus(status: Stripe.Subscription.Status) {
+  switch (status) {
+    case "active":
+    case "trialing":
+      return "ACTIVE";
+    case "past_due":
+    case "paused":
+      return "PAST_DUE";
+    case "unpaid":
+      return "UNPAID";
+    case "incomplete":
+      return "PENDING";
+    case "incomplete_expired":
+    case "canceled":
+    default:
+      return "CANCELED";
+  }
+}
+
 export async function POST(req: Request) {
   const body = await req.text();
   const signature = (await headers()).get("Stripe-Signature") as string;
@@ -25,91 +44,106 @@ export async function POST(req: Request) {
     return errorResponse("Webhook inválido.", 400);
   }
 
-  const session = event.data.object as Stripe.Checkout.Session;
+  try {
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const subscriptionId = session.metadata?.subscriptionId;
 
-  if (event.type === "checkout.session.completed") {
-    // Recuperar a assinatura pelo ID salvo no metadata
-    const subscriptionId = session.metadata?.subscriptionId;
+        if (subscriptionId) {
+          console.log(`Pagamento confirmado para assinatura: ${subscriptionId}`);
 
-    if (subscriptionId) {
-      console.log(`Pagamento confirmado para assinatura: ${subscriptionId}`);
-      
-      try {
-        // 1. Ativar a nova assinatura
-        await prisma.subscription.update({
-          where: {
-            id: subscriptionId,
-          },
-          data: {
-            status: "ACTIVE",
-            stripeCustomerId: session.customer as string,
-            stripeSubscriptionId: session.subscription as string,
-            // Poderíamos calcular o fim do período aqui ou deixar para outro webhook
-          },
-        });
+          await prisma.subscription.update({
+            where: {
+              id: subscriptionId,
+            },
+            data: {
+              status: "ACTIVE",
+              stripeCustomerId: session.customer as string,
+              stripeSubscriptionId: session.subscription as string,
+            },
+          });
 
-        // 2. Cancelar assinaturas antigas ATIVAS deste usuário (Upgrade/Downgrade/Troca)
-        const userId = session.metadata?.["userId"];
-        if (userId) {
+          const userId = session.metadata?.["userId"];
+          if (userId) {
             const oldSubscriptions = await prisma.subscription.findMany({
-                where: {
-                    userId: userId,
-                    status: "ACTIVE",
-                    id: { not: subscriptionId } // Exclui a atual
-                }
+              where: {
+                userId: userId,
+                status: "ACTIVE",
+                id: { not: subscriptionId }
+              }
             });
 
             for (const oldSub of oldSubscriptions) {
-                if (oldSub.stripeSubscriptionId) {
-                    try {
-                        console.log(`Cancelando assinatura antiga: ${oldSub.id} (${oldSub.stripeSubscriptionId})`);
-                        // Cancela no Stripe (prorate=true gera crédito para o cliente)
-                        await stripe.subscriptions.cancel(oldSub.stripeSubscriptionId, {
-                            prorate: true,
-                        });
-                        
-                        // Atualiza status no banco
-                        await prisma.subscription.update({
-                            where: { id: oldSub.id },
-                            data: { status: "CANCELED" }
-                        });
-                    } catch (err) {
-                        console.error(`Erro ao cancelar assinatura antiga ${oldSub.id}:`, err);
-                    }
-                }
-            }
-        }
+              if (oldSub.stripeSubscriptionId) {
+                try {
+                  console.log(`Cancelando assinatura antiga: ${oldSub.id} (${oldSub.stripeSubscriptionId})`);
+                  await stripe.subscriptions.cancel(oldSub.stripeSubscriptionId, {
+                    prorate: true,
+                  });
 
-      } catch (error) {
-        console.error("Erro ao atualizar assinatura no banco:", error);
-        return errorResponse("Erro ao atualizar banco de dados.", 500);
-      }
-    } else {
-        // Fallback: Tentar buscar pelo stripeCheckoutSessionId se o metadata falhar
-        console.warn("SubscriptionID não encontrado no metadata, tentando busca por Session ID");
-        try {
-            const subscription = await prisma.subscription.findFirst({
-                where: {
-                    stripeCheckoutSessionId: session.id
+                  await prisma.subscription.update({
+                    where: { id: oldSub.id },
+                    data: { status: "CANCELED" }
+                  });
+                } catch (err) {
+                  console.error(`Erro ao cancelar assinatura antiga ${oldSub.id}:`, err);
                 }
+              }
+            }
+          }
+        } else {
+          console.warn("SubscriptionID não encontrado no metadata, tentando busca por Session ID");
+          try {
+            const subscription = await prisma.subscription.findFirst({
+              where: {
+                stripeCheckoutSessionId: session.id
+              }
             });
 
             if (subscription) {
-                await prisma.subscription.update({
-                    where: { id: subscription.id },
-                    data: {
-                        status: "ACTIVE",
-                        stripeCustomerId: session.customer as string,
-                        stripeSubscriptionId: session.subscription as string,
-                    }
-                });
+              await prisma.subscription.update({
+                where: { id: subscription.id },
+                data: {
+                  status: "ACTIVE",
+                  stripeCustomerId: session.customer as string,
+                  stripeSubscriptionId: session.subscription as string,
+                }
+              });
             } else {
-                console.error("Assinatura não encontrada para Session ID:", session.id);
+              console.error("Assinatura não encontrada para Session ID:", session.id);
             }
-        } catch (error) {
+          } catch (error) {
             console.error("Erro ao atualizar assinatura via Session ID:", error);
+          }
         }
+        break;
+      }
+      case "customer.subscription.updated":
+      case "customer.subscription.deleted": {
+        const subscription = event.data.object as Stripe.Subscription;
+        const mappedStatus = mapStripeStatus(subscription.status);
+        const currentPeriodEnd = subscription.current_period_end
+          ? new Date(subscription.current_period_end * 1000)
+          : null;
+
+        await prisma.subscription.updateMany({
+          where: {
+            stripeSubscriptionId: subscription.id
+          },
+          data: {
+            status: mappedStatus,
+            currentPeriodEnd
+          }
+        });
+        break;
+      }
+      default:
+        break;
     }
+  } catch (error) {
+    console.error("Erro ao processar webhook:", error);
+    return errorResponse("Erro ao processar webhook.", 500);
   }
 
   return new NextResponse(null, { status: 200 });
