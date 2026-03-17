@@ -43,7 +43,7 @@ export function RevenueChart({ data }: { data: { name: string; value: number }[]
                 tickFormatter={(value) => `R$${value}`}
               />
               <Tooltip 
-                formatter={(value: number | string) => [`R$ ${Number(value).toFixed(2)}`, 'Receita']}
+                formatter={(value: number | string | undefined) => [`R$ ${Number(value ?? 0).toFixed(2)}`, 'Receita']}
                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
               />
               <Line
