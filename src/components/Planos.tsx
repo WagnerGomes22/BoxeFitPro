@@ -54,7 +54,7 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
         toast.error("Ocorreu um erro ao processar sua solicitação.");
         console.error(error);
       } finally {
-        setLoadingId(null);s
+        setLoadingId(null);
       }
       return;
     }
