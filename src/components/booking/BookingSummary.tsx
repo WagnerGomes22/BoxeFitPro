@@ -51,7 +51,7 @@ export function BookingSummary({
       <CardContent className="p-6 space-y-8">
         {date && (
           <div className="space-y-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Data do Combate</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Data Do Treino</p>
             <div className="flex items-center gap-3">
                <Calendar className="h-5 w-5 text-red-500" />
                <p className="font-mono text-lg font-bold text-white uppercase tracking-tight">
@@ -63,7 +63,7 @@ export function BookingSummary({
 
         {timeSlot && (
           <div className="space-y-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Início do Round</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Início Da Aula</p>
             <div className="flex items-center gap-3">
                <Clock className="h-5 w-5 text-red-500" />
                <p className="font-mono text-3xl font-bold text-white tracking-tighter">

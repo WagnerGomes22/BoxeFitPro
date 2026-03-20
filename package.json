@@ -8,11 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "db:clean": "tsx prisma/clean.ts",
-    "db:seed": "tsx prisma/seed.ts"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "db:clean": "tsx prisma/clean.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
@@ -40,6 +36,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^2.30.0",
+    "dotenv": "^17.3.1",
     "lucide-react": "^0.562.0",
     "next": "^16.1.6",
     "next-auth": "^5.0.0-beta.30",

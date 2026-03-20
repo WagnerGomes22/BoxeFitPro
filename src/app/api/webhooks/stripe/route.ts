@@ -122,7 +122,7 @@ export async function POST(req: Request) {
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription & {
-          current_period_end?: number;
+          current_period_end?: number; 
         };
         const mappedStatus = mapStripeStatus(subscription.status);
         const currentPeriodEnd = subscription.current_period_end

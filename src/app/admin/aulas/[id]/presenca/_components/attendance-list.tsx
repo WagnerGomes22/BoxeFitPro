@@ -112,7 +112,7 @@ export function AttendanceList({ initialBookings, isLocked }: AttendanceListProp
                   className={`h-9 w-9 p-0 rounded-full transition-all ${
                     booking.status === 'ATTENDED' 
                       ? 'bg-green-600 hover:bg-green-700 text-white shadow-sm' 
-                      : 'text-zinc-300 hover:text-green-600 hover:bg-green-50 border border-zinc-200 hover:border-green-200'
+                      : 'text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 hover:text-green-800'
                   }`}
                   onClick={() => handleUpdate(booking.id, BookingStatus.ATTENDED)}
                   disabled={loadingId === booking.id}
@@ -131,7 +131,7 @@ export function AttendanceList({ initialBookings, isLocked }: AttendanceListProp
                   className={`h-9 w-9 p-0 rounded-full transition-all ${
                     booking.status === 'NO_SHOW' 
                       ? 'bg-red-600 hover:bg-red-700 text-white shadow-sm' 
-                      : 'text-zinc-300 hover:text-red-600 hover:bg-red-50 border border-zinc-200 hover:border-red-200'
+                      : 'text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 hover:text-red-800'
                   }`}
                   onClick={() => handleUpdate(booking.id, BookingStatus.NO_SHOW)}
                   disabled={loadingId === booking.id}

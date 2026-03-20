@@ -26,5 +26,12 @@ export async function getAdminClasses() {
     }
   });
 
-  return classes;
+  const sortedClasses = [...classes].sort((a, b) => {
+    if (b._count.bookings !== a._count.bookings) {
+      return b._count.bookings - a._count.bookings;
+    }
+    return new Date(b.startTime).getTime() - new Date(a.startTime).getTime();
+  });
+
+  return sortedClasses;
 }

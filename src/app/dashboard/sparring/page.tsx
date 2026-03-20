@@ -40,6 +40,10 @@ export default async function SparringDashboard() {
 
   const matches = await getMySparringMatches();
   const nextMatch = matches.find(m => m.status === "SCHEDULED" && new Date(m.date) > new Date());
+  const userName = profile.user.name?.split(" ")[0] || "Você";
+  const nextOpponent = nextMatch
+    ? (nextMatch.studentAId === profile.userId ? nextMatch.studentB.name : nextMatch.studentA.name)
+    : null;
 
   return (
     <div className="space-y-8">
@@ -110,7 +114,7 @@ export default async function SparringDashboard() {
             {nextMatch ? (
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="space-y-1">
-                  <p className="font-medium text-lg">vs. {nextMatch.studentAId === profile.userId ? nextMatch.studentB.name : nextMatch.studentA.name}</p>
+                  <p className="font-medium text-lg">{userName} vs. {nextOpponent}</p>
                   <p className="text-sm text-muted-foreground">
                     {new Date(nextMatch.date).toLocaleDateString('pt-BR')} às {new Date(nextMatch.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </p>

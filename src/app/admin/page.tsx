@@ -3,8 +3,21 @@ import { Users, Calendar, DollarSign, Activity } from "lucide-react";
 import { getAdminDashboardData } from "@/actions/admin/get-dashboard-data";
 import { RevenueChart, BookingsChart, ModalitiesChart } from "./_components/admin-charts";
 import { OperationalList } from "./_components/operational-list";
+import { auth } from "@/auth";
 
 export default async function AdminPage() {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-semibold text-zinc-900">Acesso restrito</h1>
+          <p className="text-sm text-zinc-600">Apenas pessoas autorizadas conseguem acessar esta área.</p>
+        </div>
+      </div>
+    );
+  }
+
   const data = await getAdminDashboardData();
 
   if (!data) {

@@ -76,7 +76,7 @@ export default async function ProgressPage() {
         <div className="relative z-10 p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 min-h-[250px]">
           <div className="flex-1 space-y-4 text-center md:text-left">
             <h3 className="text-2xl md:text-4xl font-black text-white italic tracking-tighter uppercase leading-tight max-w-2xl drop-shadow-lg">
-              &quot;Todo mundo tem um plano <br/> até levar um soco na boca.&quot;
+              &quot;Todo mundo tem um plano <br/> até tomar o primeiro soco na cara.&quot;
             </h3>
             <p className="text-neutral-400 font-medium tracking-widest uppercase text-sm md:text-base border-l-4 border-red-600 pl-4 ml-auto mr-auto md:ml-0 md:mr-0 w-fit">
               — Mike Tyson

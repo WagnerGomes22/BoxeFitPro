@@ -142,12 +142,16 @@ export function UsersTable({ users }: UsersTableProps) {
                       }
                       className="w-24 justify-center"
                     >
-                      {user.role === "STUDENT" ? "ALUNO" : user.role}
+                      {user.role === "ADMIN"
+                        ? "ADMIN"
+                        : user.role === "INSTRUCTOR"
+                          ? "INSTRUTOR"
+                          : "ALUNO"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      {/* Botões rápidos para alternar roles */}
+                  
                       {user.role !== "INSTRUCTOR" && (
                           <Button 
                               variant="ghost" 

@@ -65,7 +65,7 @@ export function ImageUpload({ currentImage, name }: ImageUploadProps) {
   return (
     <div className="relative group">
       <Avatar className="h-32 w-32 border-4 border-red-100 dark:border-red-900/20 transition-all group-hover:opacity-80">
-        <AvatarImage src={preview || ""} />
+        <AvatarImage src={preview || ""} className="object-cover" />
         <AvatarFallback className="text-4xl font-black text-red-600 bg-red-50 dark:bg-red-950/30">
           {name?.slice(0, 2).toUpperCase()}
         </AvatarFallback>

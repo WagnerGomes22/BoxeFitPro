@@ -52,8 +52,8 @@ export function Sidebar({ user }: SidebarProps) {
         {/* User 'Tag' */}
         <div className="bg-neutral-900/50 p-4 border-l-2 border-red-600">
           <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 rounded-none border border-neutral-800">
-              <AvatarImage src={user?.image || ""} />
+            <Avatar className="h-14 w-14 rounded-none border border-neutral-800">
+              <AvatarImage src={user?.image || ""} className="object-cover" />
               <AvatarFallback className="bg-neutral-800 text-xs font-bold text-neutral-300 rounded-none font-mono">
                 {initials}
               </AvatarFallback>

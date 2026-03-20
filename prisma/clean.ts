@@ -1,58 +1,77 @@
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
+import dotenv from "dotenv";
+
+dotenv.config({ path: ".env" });
+dotenv.config({ path: ".env.local", override: true });
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("🧹 Iniciando limpeza do banco de dados...");
+  const fullClean = process.env.FULL_CLEAN === "true";
 
   try {
-    // 1. Limpar todas as inscrições (subscriptions)
     console.log("Removendo assinaturas...");
     await prisma.subscription.deleteMany({});
 
-    // 2. Limpar todos os agendamentos (bookings)
+    console.log("Removendo sparring matches...");
+    await prisma.sparringMatch.deleteMany({});
+
+    console.log("Removendo sparring requests...");
+    await prisma.sparringRequest.deleteMany({});
+
+    console.log("Removendo sparring profiles...");
+    await prisma.sparringProfile.deleteMany({});
+
     console.log("Removendo agendamentos...");
     await prisma.booking.deleteMany({});
 
-    // 2.1 Limpar todas as aulas (classes) - ADICIONADO
     console.log("Removendo aulas...");
     await prisma.class.deleteMany({});
 
-    // 3. Limpar contatos de emergência
     console.log("Removendo contatos de emergência...");
     await prisma.emergencyContact.deleteMany({});
 
-    // 4. Limpar endereços
     console.log("Removendo endereços...");
     await prisma.address.deleteMany({});
 
-    // 5. Limpar contas (NextAuth) e sessões se houver
+    console.log("Removendo tokens de reset de senha...");
+    await prisma.passwordResetToken.deleteMany({});
+
     console.log("Removendo contas vinculadas e sessões...");
-    await prisma.account.deleteMany({});
-    await prisma.session.deleteMany({});
-
-    // 6. Limpar usuários (EXCETO O PROFESSOR E O ALUNO DE TESTE PADRÃO se quiser manter)
-    // Se quiser apagar TUDO, basta remove o where.
-    // Vou apagar tudo que NÃO seja o instrutor, para não quebrar as aulas.
-    console.log("Removendo usuários (mantendo instrutor)...");
-    
-    // Primeiro identificamos o instrutor para não deletar
-    const instructor = await prisma.user.findUnique({
-        where: { email: "carlos.silva@boxefit.com" }
-    });
-
-    if (instructor) {
-        await prisma.user.deleteMany({
-            where: {
-                id: {
-                    not: instructor.id
-                }
-            }
-        });
+    if (fullClean) {
+      await prisma.account.deleteMany({});
+      await prisma.session.deleteMany({});
+      console.log("Removendo todos os usuários...");
+      await prisma.user.deleteMany({});
     } else {
-        // Se não tem instrutor, deleta tudo
-        await prisma.user.deleteMany({});
+      const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+      const adminFromEmail = adminEmail
+        ? await prisma.user.findUnique({ where: { email: adminEmail } })
+        : null;
+
+      const adminUser =
+        adminFromEmail ||
+        (await prisma.user.findFirst({
+          where: { role: Role.ADMIN },
+          orderBy: { createdAt: "asc" },
+        }));
+
+      if (!adminUser) {
+        console.error("Nenhum usuário ADMIN encontrado. Abortando limpeza.");
+        return;
+      }
+
+      await prisma.account.deleteMany({ where: { userId: { not: adminUser.id } } });
+      await prisma.session.deleteMany({ where: { userId: { not: adminUser.id } } });
+
+      console.log("Removendo usuários (mantendo apenas o admin)...");
+      await prisma.user.deleteMany({ where: { id: { not: adminUser.id } } });
+      await prisma.user.update({
+        where: { id: adminUser.id },
+        data: { role: Role.ADMIN },
+      });
     }
 
     console.log("✅ Limpeza concluída com sucesso!");

@@ -18,6 +18,14 @@ interface SidebarAdminProps {
 export function SidebarAdmin({ user }: SidebarAdminProps) {
   const pathname = usePathname();
   const initials = user?.name?.slice(0, 2).toUpperCase() || "AD";
+  const roleLabel =
+    user?.role === "ADMIN"
+      ? "ADMIN"
+      : user?.role === "INSTRUCTOR"
+        ? "INSTRUTOR"
+        : user?.role === "STUDENT"
+          ? "ALUNO"
+          : "STAFF";
 
   const handleSignOut = () => {
     signOut({ callbackUrl: "/login" });
@@ -38,12 +46,12 @@ export function SidebarAdmin({ user }: SidebarAdminProps) {
           BOXE<span className="text-blue-600">_ADMIN</span>
         </h1>
         <p className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase mt-1">
-          Backoffice System
+          Bem vindo ao painel administrativo
         </p>
       </div>
 
       <div className="px-4 pb-6 flex-1 flex flex-col gap-8">
-        {/* User 'Tag' */}
+       
         <div className="bg-zinc-900/50 p-4 border-l-2 border-blue-600">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10 rounded-none border border-zinc-800">
@@ -57,7 +65,7 @@ export function SidebarAdmin({ user }: SidebarAdminProps) {
                 {user?.name || "ADMINISTRADOR"}
               </p>
               <p className="text-[10px] text-zinc-500 truncate font-mono uppercase">
-                {user?.role || "STAFF"}
+                {roleLabel}
               </p>
             </div>
           </div>

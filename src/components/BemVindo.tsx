@@ -54,14 +54,6 @@ const BemVindo = () => {
             <h2 className="mb-3 text-2xl font-medium text-gray-800 md:text-2xl">
               Bem-vindo ao BoxeFit Pro
             </h2>
-            <Image
-              src="/logo-boxefit.svg"
-              alt="BoxeFit Pro"
-              width={50}
-              height={50}
-              className="w-20 h-20"
-              priority
-            />
           </div>
           <p className="text-gray-500 mb-4">
             Está pronto para começar sua jornada no mundo do boxe? Vamos te

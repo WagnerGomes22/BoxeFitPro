@@ -183,7 +183,14 @@ export async function getAdminDashboardData() {
     });
 
     const now = new Date();
-    const operationalClasses = nextClassesToday.map((c) => {
+    const sortedClassesToday = [...nextClassesToday].sort((a, b) => {
+      if (b._count.bookings !== a._count.bookings) {
+        return b._count.bookings - a._count.bookings;
+      }
+      return a.startTime.getTime() - b.startTime.getTime();
+    });
+
+    const operationalClasses = sortedClassesToday.map((c) => {
       let status = "SCHEDULED";
       if (c.endTime < now) {
         status = "COMPLETED";
@@ -224,7 +231,7 @@ export async function getAdminDashboardData() {
       });
     });
 
-    // 2. Alunos inadimplentes
+   
     const overdueSubscriptions = await prisma.subscription.findMany({
       where: { status: "PAST_DUE" },
       include: { user: { select: { name: true } } },
@@ -237,7 +244,7 @@ export async function getAdminDashboardData() {
       });
     });
 
-    // 3. Turmas quase lotadas hoje
+ 
     operationalClasses.forEach(cls => {
       if (cls.occupancy >= 80 && cls.occupancy < 100) {
         alerts.push({
@@ -252,7 +259,7 @@ export async function getAdminDashboardData() {
       }
     });
 
-    // 4. Aulas sem alunos hoje
+ 
     operationalClasses.forEach(cls => {
       if (cls.bookings === 0) {
         alerts.push({
