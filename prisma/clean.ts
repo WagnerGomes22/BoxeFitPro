@@ -1,9 +1,9 @@
 
-import { PrismaClient, Role } from "@prisma/client";
-import dotenv from "dotenv";
+import { config } from "dotenv";
+config({ path: ".env.local" });
+config({ path: ".env" });
 
-dotenv.config({ path: ".env" });
-dotenv.config({ path: ".env.local", override: true });
+import { PrismaClient, Role } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
