@@ -43,7 +43,7 @@ const BemVindo = () => {
       </div>
 
       <div className="flex w-full flex-col justify-center bg-white p-8 md:w-1/2 md:p-12 lg:p-24 relative">
-        <div className="absolute top-6 right-6 md:top-8 md:right-8">
+        <div className="mb-8 flex justify-end md:absolute md:top-8 md:right-8 md:mb-0 md:block">
           <Button asChild variant="outline" className="font-semibold text-zinc-600 border-zinc-200 hover:border-red-600 hover:text-red-600 hover:bg-red-50">
             <Link href="/login">Entrar</Link>
           </Button>

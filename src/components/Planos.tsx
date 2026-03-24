@@ -66,10 +66,12 @@ const Planos = ({ user, activePlanName }: PlanosProps) => {
 
   return (
     <div className="flex flex-col items-center justify-center pt-10">
+      <div className=" pl-4">
       <h1 className="text-4xl font-bold mb-4">Nossos Planos de Assinatura:</h1>
-      <p className="text-center text-gray-600 mb-8">
+      <p className="text-left md:text-center text-gray-600 mb-8">
         Selecione o plano que melhor se adapta aos seus objetivos
       </p>
+      </div>
       <div className="relative mt-10 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
         {/* Plano Básico */}
         <div
